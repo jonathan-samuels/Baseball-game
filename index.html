@@ -7,1133 +7,775 @@
 <title>The 100 Game · Baseball Trivia</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  html, body { height: 100%; }
-  body {
-    font-family: Georgia, serif;
-    background: linear-gradient(160deg, #1a3a2a 0%, #0d2418 55%, #0a1e14 100%);
-    background-attachment: fixed;
-    color: #f5f0e0;
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
-  #root { min-height: 100vh; }
-
-/* Scrollbar */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
-::-webkit-scrollbar-thumb { background: rgba(245,200,66,0.4); border-radius: 3px; }
-
-/* Animations */
-@keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
-@keyframes slideDown { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
-@keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.5; } }
-@keyframes flashIn { 0% { opacity:0; transform: scale(0.92) translateY(-10px); } 60% { transform: scale(1.03) translateY(0); } 100% { opacity:1; transform: scale(1); } }
-@keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
-@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-
-.fade-in { animation: fadeIn 0.4s ease forwards; }
-.flash-card { animation: flashIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
-.slide-down { animation: slideDown 0.2s ease forwards; }
-.pulse-anim { animation: pulse 1.5s ease-in-out infinite; }
-.spin { animation: spin 1s linear infinite; }
-
-/* Inputs */
-input, select, button {
-font-family: Georgia, serif;
-outline: none;
-}
-input[type=“text”], input[type=“number”], select {
-background: rgba(255,255,255,0.07);
-border: 1px solid rgba(255,255,255,0.18);
-border-radius: 8px;
-color: #f5f0e0;
-padding: 10px 14px;
-font-size: 15px;
-width: 100%;
-transition: border-color 0.2s;
-}
-input[type=“text”]:focus, input[type=“number”]:focus, select:focus {
-border-color: #f5c842;
-}
-select option { background: #0d2418; color: #f5f0e0; }
-
-button {
-cursor: pointer;
-border: none;
-border-radius: 8px;
-font-size: 15px;
-padding: 10px 20px;
-transition: all 0.18s;
-}
-button:active { transform: scale(0.97); }
-button:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
-
-.btn-gold {
-background: linear-gradient(135deg, #f5c842 0%, #e6a820 100%);
-color: #0d2418;
-font-weight: bold;
-letter-spacing: 0.02em;
-}
-.btn-gold:hover:not(:disabled) { filter: brightness(1.1); box-shadow: 0 4px 16px rgba(245,200,66,0.35); }
-
-.btn-outline {
-background: transparent;
-border: 1px solid rgba(255,255,255,0.3);
-color: #f5f0e0;
-}
-.btn-outline:hover:not(:disabled) { border-color: #f5c842; color: #f5c842; }
-
-.btn-danger {
-background: rgba(200,80,80,0.25);
-border: 1px solid rgba(200,80,80,0.5);
-color: #ff9999;
-}
-.btn-danger:hover:not(:disabled) { background: rgba(200,80,80,0.4); }
-
-/* Cards */
-.card {
-background: rgba(255,255,255,0.04);
-border: 1px solid rgba(255,255,255,0.12);
-border-radius: 12px;
-padding: 20px;
-}
-
-/* Rank badges */
-.badge-hit {
-background: rgba(80,200,100,0.18);
-border: 1px solid rgba(80,200,100,0.4);
-color: #7fffa0;
-border-radius: 6px;
-padding: 2px 8px;
-font-size: 13px;
-display: inline-block;
-}
-.badge-miss {
-background: rgba(200,80,80,0.18);
-border: 1px solid rgba(200,80,80,0.4);
-color: #ff9999;
-border-radius: 6px;
-padding: 2px 8px;
-font-size: 13px;
-display: inline-block;
-}
-
-/* Room code display */
-.room-code {
-font-family: ‘Courier New’, monospace;
-color: #f5c842;
-font-size: 42px;
-font-weight: bold;
-letter-spacing: 10px;
-text-shadow: 0 0 30px rgba(245,200,66,0.4);
-}
-
-/* Autocomplete */
-.autocomplete-list {
-position: absolute;
-z-index: 100;
-width: 100%;
-background: #122a1c;
-border: 1px solid rgba(245,200,66,0.4);
-border-radius: 8px;
-max-height: 220px;
-overflow-y: auto;
-top: calc(100% + 4px);
-left: 0;
-}
-.autocomplete-item {
-padding: 9px 14px;
-cursor: pointer;
-font-size: 14px;
-border-bottom: 1px solid rgba(255,255,255,0.06);
-transition: background 0.12s;
-}
-.autocomplete-item:hover, .autocomplete-item.selected { background: rgba(245,200,66,0.15); color: #f5c842; }
-.autocomplete-item:last-child { border-bottom: none; }
-
-/* Loading shimmer */
-.shimmer {
-background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.04) 75%);
-background-size: 200% 100%;
-animation: shimmer 1.5s infinite;
-border-radius: 6px;
-height: 16px;
-}
-
-/* Divider */
-.divider {
-height: 1px;
-background: rgba(255,255,255,0.1);
-margin: 16px 0;
-}
-
-label { display: block; font-size: 13px; color: rgba(245,240,224,0.6); margin-bottom: 6px; letter-spacing: 0.04em; text-transform: uppercase; }
-
-.gold { color: #f5c842; }
-.muted { color: rgba(245,240,224,0.5); }
-.small { font-size: 13px; }
-
-/* Progress bar */
-.progress-track {
-background: rgba(255,255,255,0.1);
-border-radius: 4px;
-height: 6px;
-overflow: hidden;
-}
-.progress-fill {
-height: 100%;
-background: linear-gradient(90deg, #f5c842, #e6a820);
-border-radius: 4px;
-transition: width 0.3s;
-}
-
-/* Tooltip */
-.tooltip-wrap { position: relative; display: inline-block; }
-.tooltip-box {
-position: absolute;
-bottom: 100%;
-left: 50%;
-transform: translateX(-50%);
-background: #0d2418;
-border: 1px solid rgba(255,255,255,0.2);
-border-radius: 6px;
-padding: 6px 10px;
-font-size: 12px;
-white-space: nowrap;
-pointer-events: none;
-margin-bottom: 6px;
-}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:Georgia,serif;background:linear-gradient(160deg,#1a3a2a 0%,#0d2418 55%,#0a1e14 100%);background-attachment:fixed;color:#f5f0e0;min-height:100vh;overflow-x:hidden}
+#root{min-height:100vh}
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:rgba(0,0,0,.2)}
+::-webkit-scrollbar-thumb{background:rgba(245,200,66,.4);border-radius:3px}
+@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slideDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+@keyframes flashIn{0%{opacity:0;transform:scale(.92) translateY(-10px)}60%{transform:scale(1.03) translateY(0)}100%{opacity:1;transform:scale(1)}}
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+.fade-in{animation:fadeIn .4s ease forwards}
+.flash-card{animation:flashIn .35s cubic-bezier(.22,1,.36,1) forwards}
+.slide-down{animation:slideDown .2s ease forwards}
+.pulse-anim{animation:pulse 1.5s ease-in-out infinite}
+.spin{animation:spin 1s linear infinite}
+input,select,button{font-family:Georgia,serif;outline:none}
+input[type=text],input[type=number],select{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.18);border-radius:8px;color:#f5f0e0;padding:10px 14px;font-size:15px;width:100%;transition:border-color .2s}
+input[type=text]:focus,input[type=number]:focus,select:focus{border-color:#f5c842}
+select option{background:#0d2418;color:#f5f0e0}
+button{cursor:pointer;border:none;border-radius:8px;font-size:15px;padding:10px 20px;transition:all .18s}
+button:active{transform:scale(.97)}
+button:disabled{opacity:.45;cursor:not-allowed;transform:none}
+.btn-gold{background:linear-gradient(135deg,#f5c842 0%,#e6a820 100%);color:#0d2418;font-weight:bold;letter-spacing:.02em}
+.btn-gold:hover:not(:disabled){filter:brightness(1.1);box-shadow:0 4px 16px rgba(245,200,66,.35)}
+.btn-outline{background:transparent;border:1px solid rgba(255,255,255,.3);color:#f5f0e0}
+.btn-outline:hover:not(:disabled){border-color:#f5c842;color:#f5c842}
+.card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:20px}
+.badge-hit{background:rgba(80,200,100,.18);border:1px solid rgba(80,200,100,.4);color:#7fffa0;border-radius:6px;padding:2px 8px;font-size:13px;display:inline-block}
+.badge-miss{background:rgba(200,80,80,.18);border:1px solid rgba(200,80,80,.4);color:#ff9999;border-radius:6px;padding:2px 8px;font-size:13px;display:inline-block}
+.room-code{font-family:'Courier New',monospace;color:#f5c842;font-size:42px;font-weight:bold;letter-spacing:10px;text-shadow:0 0 30px rgba(245,200,66,.4)}
+.autocomplete-list{position:absolute;z-index:100;width:100%;background:#122a1c;border:1px solid rgba(245,200,66,.4);border-radius:8px;max-height:220px;overflow-y:auto;top:calc(100% + 4px);left:0}
+.autocomplete-item{padding:9px 14px;cursor:pointer;font-size:14px;border-bottom:1px solid rgba(255,255,255,.06);transition:background .12s}
+.autocomplete-item:hover,.autocomplete-item.selected{background:rgba(245,200,66,.15);color:#f5c842}
+.autocomplete-item:last-child{border-bottom:none}
+.progress-track{background:rgba(255,255,255,.1);border-radius:4px;height:6px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,#f5c842,#e6a820);border-radius:4px;transition:width .3s}
+label{display:block;font-size:13px;color:rgba(245,240,224,.6);margin-bottom:6px;letter-spacing:.04em;text-transform:uppercase}
+.gold{color:#f5c842}
+.muted{color:rgba(245,240,224,.5)}
+.small{font-size:13px}
 </style>
-
 </head>
 <body>
 <div id="root"></div>
-<script type="text/babel">
-const { useState, useEffect, useRef, useCallback, useMemo } = React;
+<script>
+'use strict';
+var e = React.createElement;
+var useState = React.useState;
+var useEffect = React.useEffect;
+var useRef = React.useRef;
+var useMemo = React.useMemo;
 
-// ─── CONSTANTS ───────────────────────────────────────────────────────────────
+// ── CONSTANTS ────────────────────────────────────────────────────────────────
 
-const STAT_CATEGORIES = [
+var STAT_CATEGORIES = [
 { group: ‘Batting’, stats: [
-{ label: ‘Home Runs’,       api: ‘homeRuns’,          statGroup: ‘hitting’,  fmt: (v) => v },
-{ label: ‘RBI’,             api: ‘rbi’,               statGroup: ‘hitting’,  fmt: (v) => v },
-{ label: ‘Hits’,            api: ‘hits’,              statGroup: ‘hitting’,  fmt: (v) => v },
-{ label: ‘Batting Average’, api: ‘battingAverage’,    statGroup: ‘hitting’,  fmt: (v) => parseFloat(v).toFixed(3) },
-{ label: ‘OPS’,             api: ‘onBasePlusSlugging’, statGroup: ‘hitting’, fmt: (v) => parseFloat(v).toFixed(3) },
-{ label: ‘Stolen Bases’,    api: ‘stolenBases’,       statGroup: ‘hitting’,  fmt: (v) => v },
+{ label: ‘Home Runs’,    api: ‘homeRuns’,           statGroup: ‘hitting’,  fmt: function(v){ return v; } },
+{ label: ‘RBI’,          api: ‘rbi’,                statGroup: ‘hitting’,  fmt: function(v){ return v; } },
+{ label: ‘Hits’,         api: ‘hits’,               statGroup: ‘hitting’,  fmt: function(v){ return v; } },
+{ label: ‘Batting Avg’,  api: ‘battingAverage’,     statGroup: ‘hitting’,  fmt: function(v){ return parseFloat(v).toFixed(3); } },
+{ label: ‘OPS’,          api: ‘onBasePlusSlugging’, statGroup: ‘hitting’,  fmt: function(v){ return parseFloat(v).toFixed(3); } },
+{ label: ‘Stolen Bases’, api: ‘stolenBases’,        statGroup: ‘hitting’,  fmt: function(v){ return v; } },
 ]},
 { group: ‘Pitching’, stats: [
-{ label: ‘Wins’,            api: ‘wins’,              statGroup: ‘pitching’, fmt: (v) => v },
-{ label: ‘ERA’,             api: ‘earnedRunAverage’,  statGroup: ‘pitching’, fmt: (v) => parseFloat(v).toFixed(2) },
-{ label: ‘Strikeouts’,      api: ‘strikeouts’,        statGroup: ‘pitching’, fmt: (v) => v },
-{ label: ‘Saves’,           api: ‘saves’,             statGroup: ‘pitching’, fmt: (v) => v },
+{ label: ‘Wins’,         api: ‘wins’,               statGroup: ‘pitching’, fmt: function(v){ return v; } },
+{ label: ‘ERA’,          api: ‘earnedRunAverage’,   statGroup: ‘pitching’, fmt: function(v){ return parseFloat(v).toFixed(2); } },
+{ label: ‘Strikeouts’,   api: ‘strikeouts’,         statGroup: ‘pitching’, fmt: function(v){ return v; } },
+{ label: ‘Saves’,        api: ‘saves’,              statGroup: ‘pitching’, fmt: function(v){ return v; } },
 ]},
 ];
 
-const ALL_STATS = STAT_CATEGORIES.flatMap(g => g.stats.map(s => ({ …s, group: g.group })));
+var ALL_STATS = [];
+STAT_CATEGORIES.forEach(function(g) {
+g.stats.forEach(function(s) { ALL_STATS.push(Object.assign({}, s, { group: g.group })); });
+});
 
-const TIME_PERIODS = [
-{ label: ‘Last 5 Years’,  value: ‘last5’,   startYear: new Date().getFullYear() - 5 },
+var TIME_PERIODS = [
+{ label: ‘Last 5 Years’,  value: ‘last5’,    startYear: new Date().getFullYear() - 5 },
 { label: ‘Since 2000’,    value: ‘since2000’, startYear: 2000 },
 { label: ‘Since 1990’,    value: ‘since1990’, startYear: 1990 },
 { label: ‘All Time’,      value: ‘alltime’,   startYear: 1969 },
 ];
 
-const currentYear = new Date().getFullYear() - 1; // use last completed season
+var currentYear = new Date().getFullYear() - 1;
+var RATE_STATS = { battingAverage: true, onBasePlusSlugging: true, earnedRunAverage: true };
 
-// ─── UTILS ───────────────────────────────────────────────────────────────────
+// ── UTILS ─────────────────────────────────────────────────────────────────────
 
-const rand4 = () => Math.random().toString(36).substring(2, 6).toUpperCase().replace(/[^A-Z0-9]/g, ‘X’).padEnd(4,‘X’).substring(0,4);
+function rand4() {
+var chars = ‘ABCDEFGHJKLMNPQRSTUVWXYZ23456789’;
+var out = ‘’;
+for (var i = 0; i < 4; i++) out += chars[Math.floor(Math.random() * chars.length)];
+return out;
+}
 
-const normalizeName = (name) =>
-name.toLowerCase().trim()
+function normalizeName(name) {
+return name.toLowerCase().trim()
 .normalize(‘NFD’).replace(/[\u0300-\u036f]/g, ‘’)
 .replace(/[^a-z0-9 ]/g, ‘’);
-
-// ─── API LAYER ────────────────────────────────────────────────────────────────
-
-// Fetch leaders for a single season
-const fetchSingleSeason = async (leaderCategory, statGroup, season) => {
-const url = `https://statsapi.mlb.com/api/v1/stats/leaders?leaderCategories=${leaderCategory}&season=${season}&leaderGameTypes=R&limit=500&statGroup=${statGroup}`;
-const res = await fetch(url);
-if (!res.ok) throw new Error(`HTTP ${res.status}`);
-const data = await res.json();
-const leaders = data?.leagueLeaders?.[0]?.leaders ?? [];
-return leaders.map(l => ({
-name: l.person?.fullName ?? ‘’,
-playerId: l.person?.id,
-value: parseFloat(l.value ?? 0),
-}));
-};
-
-// For cumulative stats (HR, RBI, etc.) we sum across seasons.
-// For rate stats (AVG, ERA, OPS) we take the career-style best weighted —
-// for simplicity, we fetch them as career stats filtered by range using per-season approach then pick the player’s TOTAL from each season.
-const RATE_STATS = new Set([‘battingAverage’, ‘onBasePlusSlugging’, ‘earnedRunAverage’]);
-const BASE_STATS = { ‘battingAverage’: ‘hits’, ‘onBasePlusSlugging’: null, ‘earnedRunAverage’: null };
-
-const aggregateSeasons = async (leaderCategory, statGroup, startYear, onProgress) => {
-const endYear = currentYear;
-const seasons = [];
-for (let y = startYear; y <= endYear; y++) seasons.push(y);
-
-const isRate = RATE_STATS.has(leaderCategory);
-
-// Map: playerId -> { name, total, atBats (for avg), innings (for era), ops numerator stuff }
-const playerMap = {};
-
-for (let i = 0; i < seasons.length; i++) {
-onProgress && onProgress(Math.round(((i + 1) / seasons.length) * 100));
-try {
-const rows = await fetchSingleSeason(leaderCategory, statGroup, seasons[i]);
-for (const row of rows) {
-if (!row.playerId || !row.name) continue;
-if (!playerMap[row.playerId]) playerMap[row.playerId] = { name: row.name, total: 0, seasonCount: 0 };
-if (isRate) {
-// For rate stats: store an array of season values, we’ll compute weighted average later
-if (!playerMap[row.playerId].values) playerMap[row.playerId].values = [];
-playerMap[row.playerId].values.push(row.value);
-} else {
-playerMap[row.playerId].total += row.value;
-}
-playerMap[row.playerId].seasonCount++;
-}
-} catch (e) {
-// Skip seasons that fail (some early seasons may not have all stats)
-console.warn(`Season ${seasons[i]} fetch failed for ${leaderCategory}:`, e.message);
-}
 }
 
-let players = Object.values(playerMap);
-
-if (isRate) {
-// Average across seasons they played
-players = players.map(p => ({ …p, total: p.values && p.values.length ? p.values.reduce((a,b)=>a+b,0)/p.values.length : 0 }));
+function findStat(apiKey) {
+for (var i = 0; i < ALL_STATS.length; i++) { if (ALL_STATS[i].api === apiKey) return ALL_STATS[i]; }
+return null;
 }
 
-// For ERA and AVG lower is better — sort ascending
-const ascending = leaderCategory === ‘earnedRunAverage’ || leaderCategory === ‘battingAverage’;
-// ERA: filter out players with very few entries (probably relievers with tiny samples)
-let filtered = players.filter(p => p.total > 0);
-if (leaderCategory === ‘earnedRunAverage’) filtered = filtered.filter(p => p.seasonCount >= 2);
-if (leaderCategory === ‘battingAverage’) filtered = filtered.filter(p => p.seasonCount >= 1);
+function findPeriod(val) {
+for (var i = 0; i < TIME_PERIODS.length; i++) { if (TIME_PERIODS[i].value === val) return TIME_PERIODS[i]; }
+return null;
+}
 
-filtered.sort((a, b) => ascending ? a.total - b.total : b.total - a.total);
+// ── STORAGE ───────────────────────────────────────────────────────────────────
 
-return filtered.slice(0, 150).map((p, i) => ({ rank: i + 1, name: p.name, value: p.total }));
-};
-
-// Main fetch entry point
-const fetchLeaderboard = async (statApiKey, statGroup, timePeriodValue, onProgress) => {
-const period = TIME_PERIODS.find(p => p.value === timePeriodValue);
-if (!period) throw new Error(‘Unknown time period’);
-
-onProgress && onProgress(0);
-const rows = await aggregateSeasons(statApiKey, statGroup, period.startYear, onProgress);
-onProgress && onProgress(100);
-return rows; // [{rank, name, value}]
-};
-
-// ─── SHARED STATE (localStorage + BroadcastChannel) ───────────────────────────
-
-const STORAGE_KEY = ‘the100game_rooms’;
-
-const getRooms = () => { try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || ‘{}’); } catch { return {}; } };
-const saveRooms = (rooms) => localStorage.setItem(STORAGE_KEY, JSON.stringify(rooms));
-
-const getRoom = (code) => getRooms()[code] ?? null;
-const setRoom = (code, data) => {
-const rooms = getRooms();
-rooms[code] = { …data, updatedAt: Date.now() };
+var STORAGE_KEY = ‘the100game_rooms’;
+function getRooms() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || ‘{}’); } catch(err) { return {}; } }
+function saveRooms(r) { localStorage.setItem(STORAGE_KEY, JSON.stringify(r)); }
+function getRoom(code) { return getRooms()[code] || null; }
+function setRoom(code, data) {
+var rooms = getRooms();
+rooms[code] = Object.assign({}, data, { updatedAt: Date.now() });
 saveRooms(rooms);
+}
+function updateRoomSetting(code, key, val) {
+var rooms = getRooms();
+if (!rooms[code]) return;
+if (!rooms[code].settings) rooms[code].settings = {};
+rooms[code].settings[key] = val;
+rooms[code].updatedAt = Date.now();
+saveRooms(rooms);
+}
+
+// ── API ───────────────────────────────────────────────────────────────────────
+
+function fetchSingleSeason(leaderCategory, statGroup, season) {
+var url = ‘https://statsapi.mlb.com/api/v1/stats/leaders?leaderCategories=’ + leaderCategory +
+‘&season=’ + season + ‘&leaderGameTypes=R&limit=500&statGroup=’ + statGroup;
+return fetch(url).then(function(res) {
+if (!res.ok) throw new Error(’HTTP ’ + res.status);
+return res.json();
+}).then(function(data) {
+var leaders = (data.leagueLeaders && data.leagueLeaders[0] && data.leagueLeaders[0].leaders) || [];
+return leaders.map(function(l) {
+return {
+name: (l.person && l.person.fullName) || ‘’,
+playerId: l.person && l.person.id,
+value: parseFloat(l.value || 0)
 };
+});
+});
+}
 
-// ─── SMALL COMPONENTS ─────────────────────────────────────────────────────────
+function aggregateSeasons(leaderCategory, statGroup, startYear, onProgress) {
+var seasons = [];
+for (var y = startYear; y <= currentYear; y++) seasons.push(y);
+var isRate = !!RATE_STATS[leaderCategory];
+var playerMap = {};
 
-const Spinner = ({ size = 20 }) => (
-
-  <div className="spin" style={{ width: size, height: size, border: `2px solid rgba(255,255,255,0.2)`, borderTopColor: '#f5c842', borderRadius: '50%', display: 'inline-block' }} />
+function processNext(i) {
+if (i >= seasons.length) {
+var players = Object.keys(playerMap).map(function(k) { return playerMap[k]; });
+if (isRate) {
+players = players.map(function(p) {
+var avg = p.vals && p.vals.length ? p.vals.reduce(function(a, b) { return a + b; }, 0) / p.vals.length : 0;
+return Object.assign({}, p, { total: avg });
+});
+}
+var ascending = leaderCategory === ‘earnedRunAverage’ || leaderCategory === ‘battingAverage’;
+var filtered = players.filter(function(p) { return p.total > 0; });
+if (leaderCategory === ‘earnedRunAverage’) filtered = filtered.filter(function(p) { return p.seasonCount >= 2; });
+filtered.sort(function(a, b) { return ascending ? a.total - b.total : b.total - a.total; });
+return Promise.resolve(
+filtered.slice(0, 150).map(function(p, idx) { return { rank: idx + 1, name: p.name, value: p.total }; })
 );
+}
+if (onProgress) onProgress(Math.round((i / seasons.length) * 100));
+return fetchSingleSeason(leaderCategory, statGroup, seasons[i]).then(function(rows) {
+rows.forEach(function(row) {
+if (!row.playerId || !row.name) return;
+if (!playerMap[row.playerId]) playerMap[row.playerId] = { name: row.name, total: 0, seasonCount: 0, vals: [] };
+if (isRate) { playerMap[row.playerId].vals.push(row.value); }
+else { playerMap[row.playerId].total += row.value; }
+playerMap[row.playerId].seasonCount++;
+});
+}).catch(function(err) {
+console.warn(‘Season ’ + seasons[i] + ’ failed:’, err.message);
+}).then(function() {
+return processNext(i + 1);
+});
+}
+return processNext(0);
+}
 
-const RankBadge = ({ rank }) => rank >= 1 && rank <= 100
-? <span className="badge-hit">#{rank}</span>
-: <span className="badge-miss">{rank > 100 ? `#${rank}` : ‘Not Found’}</span>;
+function fetchLeaderboard(statApiKey, statGroup, timePeriodValue, onProgress) {
+var period = findPeriod(timePeriodValue);
+if (!period) return Promise.reject(new Error(‘Unknown time period’));
+if (onProgress) onProgress(0);
+return aggregateSeasons(statApiKey, statGroup, period.startYear, onProgress).then(function(rows) {
+if (onProgress) onProgress(100);
+return rows;
+});
+}
 
-const ProgressBar = ({ pct }) => (
+// ── SNAKE ORDER ───────────────────────────────────────────────────────────────
 
-  <div className="progress-track">
-    <div className="progress-fill" style={{ width: `${pct}%` }} />
-  </div>
+function buildSnakeOrder(numPlayers, guessesPerRound) {
+var order = [];
+for (var g = 0; g < guessesPerRound; g++) {
+if (g % 2 === 0) { for (var p = 0; p < numPlayers; p++) order.push(p); }
+else { for (var p = numPlayers - 1; p >= 0; p–) order.push(p); }
+}
+return order;
+}
+
+// ── SMALL COMPONENTS ──────────────────────────────────────────────────────────
+
+function Spinner(props) {
+var size = props.size || 20;
+return e(‘div’, { className: ‘spin’, style: { width: size, height: size, border: ‘2px solid rgba(255,255,255,0.2)’, borderTopColor: ‘#f5c842’, borderRadius: ‘50%’, display: ‘inline-block’ } });
+}
+
+function RankBadge(props) {
+var rank = props.rank;
+if (rank >= 1 && rank <= 100) return e(‘span’, { className: ‘badge-hit’ }, ‘#’ + rank);
+return e(‘span’, { className: ‘badge-miss’ }, rank > 100 ? ‘#’ + rank : ‘Not Found’);
+}
+
+function ProgressBar(props) {
+return e(‘div’, { className: ‘progress-track’ },
+e(‘div’, { className: ‘progress-fill’, style: { width: props.pct + ‘%’ } })
 );
+}
 
-// ─── AUTOCOMPLETE INPUT ────────────────────────────────────────────────────────
+// ── AUTOCOMPLETE INPUT ────────────────────────────────────────────────────────
 
-function AutocompleteInput({ value, onChange, leaderboard, onSubmit, disabled }) {
-const [open, setOpen] = useState(false);
-const [selectedIdx, setSelectedIdx] = useState(-1);
-const inputRef = useRef(null);
+function AutocompleteInput(props) {
+var value = props.value, onChange = props.onChange, leaderboard = props.leaderboard;
+var onSubmit = props.onSubmit, disabled = props.disabled;
+var s1 = useState(false); var open = s1[0]; var setOpen = s1[1];
+var s2 = useState(-1); var selIdx = s2[0]; var setSelIdx = s2[1];
+var inputRef = useRef(null);
 
-const suggestions = useMemo(() => {
+var suggestions = useMemo(function() {
 if (!value || value.length < 2 || !leaderboard) return [];
-const norm = normalizeName(value);
-return leaderboard.filter(p => normalizeName(p.name).includes(norm)).slice(0, 8);
+var norm = normalizeName(value);
+return leaderboard.filter(function(p) { return normalizeName(p.name).indexOf(norm) !== -1; }).slice(0, 8);
 }, [value, leaderboard]);
 
-useEffect(() => { setOpen(suggestions.length > 0); setSelectedIdx(-1); }, [suggestions]);
+useEffect(function() { setOpen(suggestions.length > 0); setSelIdx(-1); }, [suggestions.length]);
 
-const choose = (name) => { onChange(name); setOpen(false); inputRef.current?.focus(); };
+function choose(name) { onChange(name); setOpen(false); if (inputRef.current) inputRef.current.focus(); }
 
-const handleKey = (e) => {
-if (!open) return;
-if (e.key === ‘ArrowDown’) { e.preventDefault(); setSelectedIdx(i => Math.min(i + 1, suggestions.length - 1)); }
-else if (e.key === ‘ArrowUp’) { e.preventDefault(); setSelectedIdx(i => Math.max(i - 1, -1)); }
-else if (e.key === ‘Enter’) {
-e.preventDefault();
-if (selectedIdx >= 0 && suggestions[selectedIdx]) choose(suggestions[selectedIdx].name);
-else if (value.trim()) onSubmit(value.trim());
+function handleKey(ev) {
+if (!open) { if (ev.key === ‘Enter’ && value.trim()) { ev.preventDefault(); onSubmit(value.trim()); } return; }
+if (ev.key === ‘ArrowDown’) { ev.preventDefault(); setSelIdx(function(i) { return Math.min(i + 1, suggestions.length - 1); }); }
+else if (ev.key === ‘ArrowUp’) { ev.preventDefault(); setSelIdx(function(i) { return Math.max(i - 1, -1); }); }
+else if (ev.key === ‘Enter’) { ev.preventDefault(); if (selIdx >= 0 && suggestions[selIdx]) choose(suggestions[selIdx].name); else if (value.trim()) onSubmit(value.trim()); }
+else if (ev.key === ‘Escape’) setOpen(false);
 }
-else if (e.key === ‘Escape’) setOpen(false);
-};
 
-return (
-<div style={{ position: ‘relative’, flex: 1 }}>
-<input
-ref={inputRef}
-type=“text”
-value={value}
-onChange={e => onChange(e.target.value)}
-onKeyDown={handleKey}
-onBlur={() => setTimeout(() => setOpen(false), 150)}
-onFocus={() => suggestions.length > 0 && setOpen(true)}
-placeholder=“Type a player name…”
-disabled={disabled}
-autoComplete=“off”
-/>
-{open && (
-<div className="autocomplete-list slide-down">
-{suggestions.map((p, i) => (
-<div key={p.name} className={`autocomplete-item${i === selectedIdx ? ' selected' : ''}`} onMouseDown={() => choose(p.name)}>
-<span style={{ marginRight: 8 }}><RankBadge rank={p.rank} /></span>
-{p.name}
-</div>
-))}
-</div>
-)}
-</div>
+return e(‘div’, { style: { position: ‘relative’, flex: 1 } },
+e(‘input’, { ref: inputRef, type: ‘text’, value: value,
+onChange: function(ev) { onChange(ev.target.value); },
+onKeyDown: handleKey,
+onBlur: function() { setTimeout(function() { setOpen(false); }, 150); },
+onFocus: function() { if (suggestions.length > 0) setOpen(true); },
+placeholder: ‘Type a player name…’, disabled: disabled, autoComplete: ‘off’
+}),
+open && e(‘div’, { className: ‘autocomplete-list slide-down’ },
+suggestions.map(function(p, i) {
+return e(‘div’, { key: p.name, className: ‘autocomplete-item’ + (i === selIdx ? ’ selected’ : ‘’),
+onMouseDown: function() { choose(p.name); }
+}, e(‘span’, { style: { marginRight: 8 } }, e(RankBadge, { rank: p.rank })), p.name);
+})
+)
 );
 }
 
-// ─── HOME SCREEN ──────────────────────────────────────────────────────────────
+// ── HOME SCREEN ───────────────────────────────────────────────────────────────
 
-function HomeScreen({ onCreateRoom, onJoinRoom }) {
-const [name, setName] = useState(’’);
-const [joinCode, setJoinCode] = useState(’’);
-const [tab, setTab] = useState(‘create’);
+function HomeScreen(props) {
+var s1 = useState(’’); var name = s1[0]; var setName = s1[1];
+var s2 = useState(’’); var joinCode = s2[0]; var setJoinCode = s2[1];
+var s3 = useState(‘create’); var tab = s3[0]; var setTab = s3[1];
 
-return (
-<div style={{ minHeight: ‘100vh’, display: ‘flex’, alignItems: ‘center’, justifyContent: ‘center’, padding: 20 }}>
-<div style={{ maxWidth: 460, width: ‘100%’ }}>
-{/* Header */}
-<div style={{ textAlign: ‘center’, marginBottom: 40 }} className=“fade-in”>
-<div style={{ fontSize: 64, marginBottom: 8 }}>⚾</div>
-<h1 style={{ fontSize: 44, fontWeight: ‘bold’, color: ‘#f5c842’, letterSpacing: ‘-0.5px’, lineHeight: 1 }}>The 100 Game</h1>
-<p style={{ color: ‘rgba(245,240,224,0.55)’, marginTop: 10, fontSize: 16 }}>Baseball’s closest-to-100 trivia challenge</p>
-</div>
-
-```
-    <div className="card fade-in" style={{ animationDelay: '0.1s' }}>
-      {/* Tab toggle */}
-      <div style={{ display: 'flex', gap: 8, marginBottom: 24, background: 'rgba(0,0,0,0.2)', borderRadius: 10, padding: 4 }}>
-        {['create', 'join'].map(t => (
-          <button key={t} onClick={() => setTab(t)} style={{
-            flex: 1, padding: '10px', borderRadius: 8, fontFamily: 'Georgia, serif', fontSize: 15, fontWeight: 'bold',
-            background: tab === t ? 'rgba(245,200,66,0.2)' : 'transparent',
-            border: tab === t ? '1px solid rgba(245,200,66,0.5)' : '1px solid transparent',
-            color: tab === t ? '#f5c842' : 'rgba(245,240,224,0.5)', cursor: 'pointer', transition: 'all 0.2s'
-          }}>
-            {t === 'create' ? '🏟 Create Room' : '🔗 Join Room'}
-          </button>
-        ))}
-      </div>
-
-      <div style={{ marginBottom: 16 }}>
-        <label>Your Name</label>
-        <input type="text" value={name} onChange={e => setName(e.target.value.slice(0, 20))} placeholder="Enter your name…" maxLength={20} />
-      </div>
-
-      {tab === 'join' && (
-        <div style={{ marginBottom: 16 }}>
-          <label>Room Code</label>
-          <input type="text" value={joinCode} onChange={e => setJoinCode(e.target.value.toUpperCase().slice(0, 4))} placeholder="e.g. ABCD" maxLength={4} style={{ letterSpacing: 6, fontFamily: 'monospace', fontSize: 20, fontWeight: 'bold', textAlign: 'center' }} />
-        </div>
-      )}
-
-      <button className="btn-gold" style={{ width: '100%', padding: '12px', fontSize: 17 }}
-        disabled={!name.trim() || (tab === 'join' && joinCode.length < 4)}
-        onClick={() => tab === 'create' ? onCreateRoom(name.trim()) : onJoinRoom(name.trim(), joinCode)}>
-        {tab === 'create' ? '🏟 Create Room' : '→ Join Room'}
-      </button>
-    </div>
-
-    {/* How to play */}
-    <div className="card fade-in" style={{ animationDelay: '0.2s', marginTop: 20 }}>
-      <h3 style={{ color: '#f5c842', marginBottom: 12, fontSize: 15 }}>📋 How to Play</h3>
-      <p className="small" style={{ color: 'rgba(245,240,224,0.7)', lineHeight: 1.7 }}>
-        The host picks a baseball stat and time period. Players take turns guessing players from that leaderboard.
-        Your score equals your guess's rank (1–100). Higher rank = more points!
-        <strong style={{ color: '#f5c842' }}> #100 scores 100 pts</strong> — rank 101+ scores 0.
-        Closest to #100 wins. Snake-draft turn order. Most points after all rounds wins!
-      </p>
-    </div>
-  </div>
-</div>
-```
-
+return e(‘div’, { style: { minHeight: ‘100vh’, display: ‘flex’, alignItems: ‘center’, justifyContent: ‘center’, padding: 20 } },
+e(‘div’, { style: { maxWidth: 460, width: ‘100%’ } },
+e(‘div’, { className: ‘fade-in’, style: { textAlign: ‘center’, marginBottom: 40 } },
+e(‘div’, { style: { fontSize: 64, marginBottom: 8 } }, ‘⚾’),
+e(‘h1’, { style: { fontSize: 44, fontWeight: ‘bold’, color: ‘#f5c842’, letterSpacing: ‘-0.5px’, lineHeight: 1 } }, ‘The 100 Game’),
+e(‘p’, { style: { color: ‘rgba(245,240,224,0.55)’, marginTop: 10, fontSize: 16 } }, “Baseball’s closest-to-100 trivia challenge”)
+),
+e(‘div’, { className: ‘card fade-in’, style: { animationDelay: ‘0.1s’ } },
+e(‘div’, { style: { display: ‘flex’, gap: 8, marginBottom: 24, background: ‘rgba(0,0,0,0.2)’, borderRadius: 10, padding: 4 } },
+e(‘button’, { onClick: function() { setTab(‘create’); }, style: { flex: 1, padding: ‘10px’, borderRadius: 8, fontFamily: ‘Georgia,serif’, fontSize: 15, fontWeight: ‘bold’, background: tab === ‘create’ ? ‘rgba(245,200,66,0.2)’ : ‘transparent’, border: tab === ‘create’ ? ‘1px solid rgba(245,200,66,0.5)’ : ‘1px solid transparent’, color: tab === ‘create’ ? ‘#f5c842’ : ‘rgba(245,240,224,0.5)’, cursor: ‘pointer’, transition: ‘all 0.2s’ } }, ‘🏟 Create Room’),
+e(‘button’, { onClick: function() { setTab(‘join’); }, style: { flex: 1, padding: ‘10px’, borderRadius: 8, fontFamily: ‘Georgia,serif’, fontSize: 15, fontWeight: ‘bold’, background: tab === ‘join’ ? ‘rgba(245,200,66,0.2)’ : ‘transparent’, border: tab === ‘join’ ? ‘1px solid rgba(245,200,66,0.5)’ : ‘1px solid transparent’, color: tab === ‘join’ ? ‘#f5c842’ : ‘rgba(245,240,224,0.5)’, cursor: ‘pointer’, transition: ‘all 0.2s’ } }, ‘🔗 Join Room’)
+),
+e(‘div’, { style: { marginBottom: 16 } },
+e(‘label’, null, ‘Your Name’),
+e(‘input’, { type: ‘text’, value: name, onChange: function(ev) { setName(ev.target.value.slice(0, 20)); }, placeholder: ‘Enter your name…’, maxLength: 20 })
+),
+tab === ‘join’ && e(‘div’, { style: { marginBottom: 16 } },
+e(‘label’, null, ‘Room Code’),
+e(‘input’, { type: ‘text’, value: joinCode, onChange: function(ev) { setJoinCode(ev.target.value.toUpperCase().slice(0, 4)); }, placeholder: ‘e.g. AB3D’, maxLength: 4, style: { letterSpacing: 6, fontFamily: ‘monospace’, fontSize: 20, fontWeight: ‘bold’, textAlign: ‘center’ } })
+),
+e(‘button’, { className: ‘btn-gold’, style: { width: ‘100%’, padding: ‘12px’, fontSize: 17 },
+disabled: !name.trim() || (tab === ‘join’ && joinCode.length < 4),
+onClick: function() { tab === ‘create’ ? props.onCreateRoom(name.trim()) : props.onJoinRoom(name.trim(), joinCode); }
+}, tab === ‘create’ ? ‘🏟 Create Room’ : ‘→ Join Room’)
+),
+e(‘div’, { className: ‘card fade-in’, style: { animationDelay: ‘0.2s’, marginTop: 20 } },
+e(‘h3’, { style: { color: ‘#f5c842’, marginBottom: 12, fontSize: 15 } }, ‘📋 How to Play’),
+e(‘p’, { className: ‘small’, style: { color: ‘rgba(245,240,224,0.7)’, lineHeight: 1.7 } },
+’The host picks a stat and time period. Players take turns guessing players from that leaderboard. Your score equals your guess's rank (1–100). ‘,
+e(‘strong’, { style: { color: ‘#f5c842’ } }, ‘#100 scores 100 pts’),
+’ — ranked 101+ scores 0. Closest to #100 wins. Most points after all rounds wins!’
+)
+)
+)
 );
 }
 
-// ─── LOBBY SCREEN ─────────────────────────────────────────────────────────────
+// ── LOBBY SCREEN ──────────────────────────────────────────────────────────────
 
-function LobbyScreen({ roomCode, myName, isHost, onStartGame, onLeave }) {
-const [room, setRoom] = useState(getRoom(roomCode));
-const [copied, setCopied] = useState(false);
-const [starting, setStarting] = useState(false);
-const [loadPct, setLoadPct] = useState(0);
-const [loadMsg, setLoadMsg] = useState(’’);
-const [error, setError] = useState(null);
+function LobbyScreen(props) {
+var roomCode = props.roomCode, myName = props.myName, isHost = props.isHost;
+var s1 = useState(getRoom(roomCode)); var room = s1[0]; var setRoomState = s1[1];
+var s2 = useState(false); var copied = s2[0]; var setCopied = s2[1];
+var s3 = useState(false); var starting = s3[0]; var setStarting = s3[1];
+var s4 = useState(0); var loadPct = s4[0]; var setLoadPct = s4[1];
+var s5 = useState(’’); var loadMsg = s5[0]; var setLoadMsg = s5[1];
+var s6 = useState(null); var error = s6[0]; var setError = s6[1];
 
-// Poll for room state
-useEffect(() => {
-const poll = () => setRoom(getRoom(roomCode));
-const iv = setInterval(poll, 1000);
-// BroadcastChannel for same-tab instant updates
-const bc = new BroadcastChannel(‘the100game’);
-bc.onmessage = (e) => { if (e.data?.roomCode === roomCode) poll(); };
-return () => { clearInterval(iv); bc.close(); };
+useEffect(function() {
+var iv = setInterval(function() { setRoomState(getRoom(roomCode)); }, 1000);
+return function() { clearInterval(iv); };
 }, [roomCode]);
 
-const updateSetting = (key, val) => {
-// Write the updated setting to localStorage so all pollers pick it up
-const rooms = getRooms();
-if (rooms[roomCode]) {
-rooms[roomCode].settings = { …(rooms[roomCode].settings || {}), [key]: val };
-rooms[roomCode].updatedAt = Date.now();
-saveRooms(rooms);
+function doUpdate(key, val) {
+updateRoomSetting(roomCode, key, val);
+setRoomState(getRoom(roomCode));
 }
-setRoom(getRoom(roomCode));
-new BroadcastChannel(‘the100game’).postMessage({ roomCode });
-};
 
-const copyCode = () => {
-navigator.clipboard.writeText(roomCode).catch(() => {});
+function copyCode() {
+try { navigator.clipboard.writeText(roomCode); } catch(err) {}
 setCopied(true);
-setTimeout(() => setCopied(false), 1800);
-};
-
-const startGame = async () => {
-setError(null);
-setStarting(true);
-const r = getRoom(roomCode);
-const { statKey, timePeriod } = r.settings;
-const stat = ALL_STATS.find(s => s.api === statKey);
-if (!stat) { setError(‘Invalid stat selected.’); setStarting(false); return; }
-
-```
-try {
-  setLoadMsg('Fetching leaderboard data…');
-  const leaderboard = await fetchLeaderboard(stat.api, stat.statGroup, timePeriod, (pct) => {
-    setLoadPct(pct);
-    setLoadMsg(`Loading seasons… ${pct}%`);
-  });
-  setLoadMsg('Done!');
-  onStartGame(leaderboard);
-} catch (e) {
-  setError(`Failed to load leaderboard: ${e.message}`);
-  setStarting(false);
+setTimeout(function() { setCopied(false); }, 1800);
 }
+
+function startGame() {
+setError(null); setStarting(true);
+var r = getRoom(roomCode);
+var s = (r && r.settings) ? r.settings : {};
+var statKey = s.statKey || ‘homeRuns’;
+var timePeriod = s.timePeriod || ‘last5’;
+var stat = findStat(statKey);
+if (!stat) { setError(‘Invalid stat.’); setStarting(false); return; }
+setLoadMsg(‘Fetching leaderboard…’);
+fetchLeaderboard(stat.api, stat.statGroup, timePeriod, function(pct) {
+setLoadPct(pct);
+setLoadMsg(’Loading seasons… ’ + pct + ‘%’);
+}).then(function(lb) {
+setLoadMsg(‘Done!’);
+props.onStartGame(lb);
+}).catch(function(err) {
+setError(’Failed to load: ’ + err.message);
+setStarting(false);
+});
+}
+
+if (!room) return e(‘div’, { style: { padding: 40, textAlign: ‘center’ } }, e(Spinner, { size: 32 }));
+
+var settings = room.settings || {};
+var players = room.players || [];
+var statKey = settings.statKey || ‘homeRuns’;
+var timePeriod = settings.timePeriod || ‘last5’;
+var rounds = settings.rounds || 3;
+var gpr = settings.guessesPerRound || 2;
+var statLabel = (findStat(statKey) || {}).label || statKey;
+var periodLabel = (findPeriod(timePeriod) || {}).label || timePeriod;
+
+return e(‘div’, { style: { minHeight: ‘100vh’, display: ‘flex’, alignItems: ‘center’, justifyContent: ‘center’, padding: 20 } },
+e(‘div’, { style: { maxWidth: 520, width: ‘100%’ } },
+e(‘div’, { className: ‘fade-in’, style: { textAlign: ‘center’, marginBottom: 28 } },
+e(‘h2’, { style: { fontSize: 26, color: ‘#f5c842’ } }, ‘🏟 Game Lobby’)
+),
+
 ```
+  e('div', { className: 'card fade-in', style: { textAlign: 'center', marginBottom: 16 } },
+    e('p', { className: 'small muted', style: { marginBottom: 8 } }, 'Share this code with friends'),
+    e('div', { className: 'room-code' }, roomCode),
+    e('button', { className: 'btn-outline', style: { marginTop: 12, fontSize: 13 }, onClick: copyCode },
+      copied ? '✅ Copied!' : '📋 Copy Code'
+    )
+  ),
 
-};
+  e('div', { className: 'card fade-in', style: { marginBottom: 16 } },
+    e('h3', { style: { fontSize: 15, color: '#f5c842', marginBottom: 12 } }, '👥 Players (' + players.length + ')'),
+    players.map(function(p, i) {
+      return e('div', { key: p.name, style: { display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderBottom: i < players.length - 1 ? '1px solid rgba(255,255,255,0.07)' : 'none' } },
+        e('div', { className: 'pulse-anim', style: { width: 8, height: 8, borderRadius: '50%', background: '#50c864' } }),
+        e('span', { style: { flex: 1 } }, p.name),
+        p.name === room.host && e('span', { className: 'small muted' }, 'Host')
+      );
+    }),
+    players.length === 1 && e('p', { className: 'small muted', style: { marginTop: 8 } }, 'Waiting for others… (solo play works too!)')
+  ),
 
-if (!room) return <div style={{ padding: 40, textAlign: ‘center’ }}><Spinner size={32} /></div>;
+  isHost
+    ? e('div', { className: 'card fade-in', style: { marginBottom: 16 } },
+        e('h3', { style: { fontSize: 15, color: '#f5c842', marginBottom: 16 } }, '⚙️ Game Settings'),
+        e('div', { style: { marginBottom: 14 } },
+          e('label', null, 'Stat Category'),
+          e('select', { value: statKey, onChange: function(ev) { doUpdate('statKey', ev.target.value); } },
+            STAT_CATEGORIES.map(function(group) {
+              return e('optgroup', { key: group.group, label: group.group },
+                group.stats.map(function(s) { return e('option', { key: s.api, value: s.api }, s.label); })
+              );
+            })
+          )
+        ),
+        e('div', { style: { marginBottom: 14 } },
+          e('label', null, 'Time Period'),
+          e('select', { value: timePeriod, onChange: function(ev) { doUpdate('timePeriod', ev.target.value); } },
+            TIME_PERIODS.map(function(p) { return e('option', { key: p.value, value: p.value }, p.label); })
+          )
+        ),
+        e('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 } },
+          e('div', null,
+            e('label', null, 'Rounds'),
+            e('select', { value: rounds, onChange: function(ev) { doUpdate('rounds', parseInt(ev.target.value)); } },
+              [1,2,3,4,5,6,7,8,9,10].map(function(n) { return e('option', { key: n, value: n }, n); })
+            )
+          ),
+          e('div', null,
+            e('label', null, 'Guesses / Round'),
+            e('select', { value: gpr, onChange: function(ev) { doUpdate('guessesPerRound', parseInt(ev.target.value)); } },
+              [1,2,3,4,5].map(function(n) { return e('option', { key: n, value: n }, n); })
+            )
+          )
+        )
+      )
+    : e('div', { className: 'card fade-in', style: { marginBottom: 16 } },
+        e('h3', { style: { fontSize: 15, color: '#f5c842', marginBottom: 12 } }, '⚙️ Game Settings'),
+        e('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 12 } },
+          [['Stat', statLabel], ['Period', periodLabel], ['Rounds', rounds], ['Guesses/Round', gpr]].map(function(pair) {
+            return e('div', { key: pair[0], style: { background: 'rgba(0,0,0,0.15)', borderRadius: 8, padding: '8px 12px' } },
+              e('div', { className: 'small muted' }, pair[0]),
+              e('div', { style: { color: '#f5c842', fontWeight: 'bold', fontSize: 15 } }, pair[1])
+            );
+          })
+        ),
+        e('p', { className: 'small muted' }, 'Waiting for the host to start…')
+      ),
 
-const settings = room.settings || {};
-const players = room.players || [];
-const statKey = settings.statKey || ‘homeRuns’;
-const timePeriod = settings.timePeriod || ‘last5’;
-const rounds = settings.rounds || 3;
-const guessesPerRound = settings.guessesPerRound || 2;
+  error && e('div', { style: { background: 'rgba(200,80,80,0.15)', border: '1px solid rgba(200,80,80,0.4)', borderRadius: 8, padding: 12, marginBottom: 12, color: '#ff9999', fontSize: 14 } }, error),
 
-return (
-<div style={{ minHeight: ‘100vh’, display: ‘flex’, alignItems: ‘center’, justifyContent: ‘center’, padding: 20 }}>
-<div style={{ maxWidth: 520, width: ‘100%’ }}>
-<div style={{ textAlign: ‘center’, marginBottom: 28 }} className=“fade-in”>
-<h2 style={{ fontSize: 26, color: ‘#f5c842’ }}>🏟 Game Lobby</h2>
-</div>
+  starting && e('div', { className: 'card', style: { marginBottom: 16 } },
+    e('div', { style: { display: 'flex', alignItems: 'center', gap: 12, marginBottom: 10 } }, e(Spinner, { size: 18 }), e('span', { className: 'small' }, loadMsg)),
+    e(ProgressBar, { pct: loadPct })
+  ),
 
-```
-    {/* Room code */}
-    <div className="card fade-in" style={{ textAlign: 'center', marginBottom: 16 }}>
-      <p className="small muted" style={{ marginBottom: 8 }}>Share this code with friends</p>
-      <div className="room-code">{roomCode}</div>
-      <button className="btn-outline" style={{ marginTop: 12, fontSize: 13 }} onClick={copyCode}>
-        {copied ? '✅ Copied!' : '📋 Copy Code'}
-      </button>
-    </div>
-
-    {/* Players */}
-    <div className="card fade-in" style={{ marginBottom: 16 }}>
-      <h3 style={{ fontSize: 15, color: '#f5c842', marginBottom: 12 }}>👥 Players ({players.length})</h3>
-      {players.map((p, i) => (
-        <div key={p.name} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderBottom: i < players.length - 1 ? '1px solid rgba(255,255,255,0.07)' : 'none' }}>
-          <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#50c864' }} className="pulse-anim" />
-          <span style={{ flex: 1 }}>{p.name}</span>
-          {p.name === room.host && <span className="small muted">Host</span>}
-        </div>
-      ))}
-      {players.length === 1 && <p className="small muted" style={{ marginTop: 8 }}>Waiting for others to join… (solo play is also fine!)</p>}
-    </div>
-
-    {/* Settings (host only) */}
-    {isHost && (
-      <div className="card fade-in" style={{ marginBottom: 16 }}>
-        <h3 style={{ fontSize: 15, color: '#f5c842', marginBottom: 16 }}>⚙️ Game Settings</h3>
-
-        <div style={{ marginBottom: 14 }}>
-          <label>Stat Category</label>
-          <select value={statKey} onChange={e => updateSetting('statKey', e.target.value)}>
-            {STAT_CATEGORIES.map(group => (
-              <optgroup key={group.group} label={group.group}>
-                {group.stats.map(s => <option key={s.api} value={s.api}>{s.label}</option>)}
-              </optgroup>
-            ))}
-          </select>
-        </div>
-
-        <div style={{ marginBottom: 14 }}>
-          <label>Time Period</label>
-          <select value={timePeriod} onChange={e => updateSetting('timePeriod', e.target.value)}>
-            {TIME_PERIODS.map(p => <option key={p.value} value={p.value}>{p.label}</option>)}
-          </select>
-        </div>
-
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 14 }}>
-          <div>
-            <label>Rounds (1–10)</label>
-            <select value={rounds} onChange={e => updateSetting('rounds', parseInt(e.target.value))}>
-              {Array.from({ length: 10 }, (_, i) => i + 1).map(n => <option key={n} value={n}>{n}</option>)}
-            </select>
-          </div>
-          <div>
-            <label>Guesses / Round</label>
-            <select value={guessesPerRound} onChange={e => updateSetting('guessesPerRound', parseInt(e.target.value))}>
-              {[1,2,3,4,5].map(n => <option key={n} value={n}>{n}</option>)}
-            </select>
-          </div>
-        </div>
-      </div>
-    )}
-
-    {/* Non-host settings view */}
-    {!isHost && (
-      <div className="card fade-in" style={{ marginBottom: 16 }}>
-        <h3 style={{ fontSize: 15, color: '#f5c842', marginBottom: 12 }}>⚙️ Game Settings</h3>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-          {[
-            ['Stat', ALL_STATS.find(s => s.api === statKey)?.label || statKey],
-            ['Period', TIME_PERIODS.find(p => p.value === timePeriod)?.label || timePeriod],
-            ['Rounds', rounds],
-            ['Guesses/Round', guessesPerRound],
-          ].map(([k, v]) => (
-            <div key={k} style={{ background: 'rgba(0,0,0,0.15)', borderRadius: 8, padding: '8px 12px' }}>
-              <div className="small muted">{k}</div>
-              <div style={{ color: '#f5c842', fontWeight: 'bold', fontSize: 15 }}>{v}</div>
-            </div>
-          ))}
-        </div>
-        <p className="small muted" style={{ marginTop: 12 }}>Waiting for the host to start the game…</p>
-      </div>
-    )}
-
-    {/* Error */}
-    {error && <div style={{ background: 'rgba(200,80,80,0.15)', border: '1px solid rgba(200,80,80,0.4)', borderRadius: 8, padding: 12, marginBottom: 12, color: '#ff9999', fontSize: 14 }}>{error}</div>}
-
-    {/* Loading progress */}
-    {starting && (
-      <div className="card" style={{ marginBottom: 16 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 10 }}>
-          <Spinner size={18} />
-          <span className="small">{loadMsg}</span>
-        </div>
-        <ProgressBar pct={loadPct} />
-      </div>
-    )}
-
-    <div style={{ display: 'flex', gap: 10 }}>
-      <button className="btn-outline" style={{ flex: '0 0 auto' }} onClick={onLeave} disabled={starting}>← Leave</button>
-      {isHost && (
-        <button className="btn-gold" style={{ flex: 1, padding: 12, fontSize: 16 }} onClick={startGame} disabled={starting || players.length === 0}>
-          {starting ? <span style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'center' }}><Spinner size={16} /> Loading…</span> : '▶ Start Game'}
-        </button>
-      )}
-    </div>
-  </div>
-</div>
+  e('div', { style: { display: 'flex', gap: 10 } },
+    e('button', { className: 'btn-outline', style: { flexShrink: 0 }, onClick: props.onLeave, disabled: starting }, '← Leave'),
+    isHost && e('button', { className: 'btn-gold', style: { flex: 1, padding: 12, fontSize: 16 }, onClick: startGame, disabled: starting || players.length === 0 },
+      starting
+        ? e('span', { style: { display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'center' } }, e(Spinner, { size: 16 }), ' Loading…')
+        : '▶ Start Game'
+    )
+  )
+)
 ```
 
 );
 }
 
-// ─── SNAKE DRAFT ORDER ────────────────────────────────────────────────────────
+// ── GAME SCREEN ───────────────────────────────────────────────────────────────
 
-// Generates the full sequence of (playerIndex, guessNumber) for one round.
-// Snake: 3 players, 2 guesses => 0,1,2, 2,1,0
-// 3 players, 3 guesses => 0,1,2, 2,1,0, 0,1,2
-function buildSnakeOrder(numPlayers, guessesPerRound) {
-const order = [];
-for (let g = 0; g < guessesPerRound; g++) {
-const forward = g % 2 === 0;
-if (forward) {
-for (let p = 0; p < numPlayers; p++) order.push(p);
-} else {
-for (let p = numPlayers - 1; p >= 0; p–) order.push(p);
+function GameScreen(props) {
+var roomCode = props.roomCode, myName = props.myName, leaderboard = props.leaderboard;
+var settings = props.settings, players = props.players, onEndGame = props.onEndGame;
+
+var stat = findStat(settings.statKey);
+var period = findPeriod(settings.timePeriod);
+var rounds = settings.rounds || 3;
+var gpr = settings.guessesPerRound || 2;
+
+var s1 = useState(1); var round = s1[0]; var setRound = s1[1];
+var s2 = useState(function() { var sc = {}; players.forEach(function(p) { sc[p.name] = 0; }); return sc; });
+var scores = s2[0]; var setScores = s2[1];
+var s3 = useState([]); var allGuesses = s3[0]; var setAllGuesses = s3[1];
+var s4 = useState(’’); var input = s4[0]; var setInput = s4[1];
+var s5 = useState(null); var flashResult = s5[0]; var setFlashResult = s5[1];
+var s6 = useState(0); var orderIdx = s6[0]; var setOrderIdx = s6[1];
+var flashTimerRef = useRef(null);
+
+// Refs for use inside submit without stale closures
+var scoresRef = useRef(scores);
+var allGuessesRef = useRef(allGuesses);
+var roundRef = useRef(round);
+var orderIdxRef = useRef(orderIdx);
+useEffect(function() { scoresRef.current = scores; }, [scores]);
+useEffect(function() { allGuessesRef.current = allGuesses; }, [allGuesses]);
+useEffect(function() { roundRef.current = round; }, [round]);
+useEffect(function() { orderIdxRef.current = orderIdx; }, [orderIdx]);
+
+var snakeOrder = useMemo(function() { return buildSnakeOrder(players.length, gpr); }, [players.length, gpr]);
+var totalTurns = snakeOrder.length;
+var currentPlayerIdx = snakeOrder[orderIdx];
+var currentPlayer = players[currentPlayerIdx];
+var isMyTurn = currentPlayer && currentPlayer.name === myName;
+
+function lookupPlayer(inputName) {
+var norm = normalizeName(inputName);
+for (var i = 0; i < leaderboard.length; i++) { if (normalizeName(leaderboard[i].name) === norm) return leaderboard[i]; }
+for (var i = 0; i < leaderboard.length; i++) { if (normalizeName(leaderboard[i].name).indexOf(norm) !== -1) return leaderboard[i]; }
+return null;
 }
-}
-return order; // Array of player indices
-}
 
-// ─── GAME SCREEN ──────────────────────────────────────────────────────────────
-
-function GameScreen({ roomCode, myName, leaderboard, settings, players, onEndGame }) {
-const stat = ALL_STATS.find(s => s.api === settings.statKey);
-const period = TIME_PERIODS.find(p => p.value === settings.timePeriod);
-const { rounds, guessesPerRound } = settings;
-
-// Game state
-const [round, setRound] = useState(1);
-const [scores, setScores] = useState(() => Object.fromEntries(players.map(p => [p.name, 0])));
-const [allGuesses, setAllGuesses] = useState([]); // [{playerName, guesserName, rank, value, pts, round}]
-const [roundGuesses, setRoundGuesses] = useState([]); // current round guesses
-const [input, setInput] = useState(’’);
-const [flashResult, setFlashResult] = useState(null);
-const [flashTimer, setFlashTimer] = useState(null);
-const [roundOrderIdx, setRoundOrderIdx] = useState(0); // index into snakeOrder
-const [guessSubmitting, setGuessSubmitting] = useState(false);
-
-const snakeOrder = useMemo(() => buildSnakeOrder(players.length, guessesPerRound), [players.length, guessesPerRound]);
-const totalTurnsPerRound = snakeOrder.length;
-
-const currentPlayerIdx = snakeOrder[roundOrderIdx];
-const currentPlayer = players[currentPlayerIdx];
-const isMyTurn = currentPlayer?.name === myName;
-
-const lookupPlayer = (inputName) => {
-const norm = normalizeName(inputName);
-const match = leaderboard.find(p => normalizeName(p.name) === norm)
-|| leaderboard.find(p => normalizeName(p.name).includes(norm))
-|| null;
-return match; // {rank, name, value} or null
-};
-
-// Sync via BroadcastChannel + localStorage
-// For same-device multiplayer, we store guesses in room state
-const bc = useRef(null);
-useEffect(() => {
-bc.current = new BroadcastChannel(‘the100game_guesses’);
-bc.current.onmessage = (e) => {
-if (e.data?.roomCode !== roomCode) return;
-const g = e.data.guess;
-const rank = g.rank;
-const pts = rank >= 1 && rank <= 100 ? rank : 0;
-// Apply remote guess
-setScores(prev => ({ …prev, [g.guesserName]: (prev[g.guesserName] || 0) + pts }));
-setAllGuesses(prev => […prev, g]);
-setRoundGuesses(prev => […prev, g]);
-if (flashTimer) clearTimeout(flashTimer);
-setFlashResult(g);
-const t = setTimeout(() => setFlashResult(null), 3000);
-setFlashTimer(t);
-setRoundOrderIdx(prev => {
-const next = prev + 1;
-if (next >= totalTurnsPerRound) {
-setRound(r => {
-if (r >= rounds) {
-// will be handled by host
-} else {
-setRoundGuesses([]);
-}
-return r < rounds ? r + 1 : r;
-});
-return 0;
-}
-return next;
-});
-};
-return () => bc.current?.close();
-}, [roomCode, rounds, totalTurnsPerRound]);
-
-// Handle a guess: score it, update state, broadcast to other tabs
-const handleSubmit = (nameInput) => {
-if (guessSubmitting || !isMyTurn) return;
-const trimmed = nameInput.trim();
+function handleSubmit(nameInput) {
+if (!isMyTurn) return;
+var trimmed = nameInput.trim();
 if (!trimmed) return;
-setGuessSubmitting(true);
 
 ```
-const found = lookupPlayer(trimmed);
-const rank = found?.rank ?? 999;
-const value = found?.value ?? 0;
-const pts = rank >= 1 && rank <= 100 ? rank : 0;
+var found = lookupPlayer(trimmed);
+var rank = found ? found.rank : 999;
+var value = found ? found.value : 0;
+var pts = (rank >= 1 && rank <= 100) ? rank : 0;
+var result = { playerName: found ? found.name : trimmed, guesserName: myName, rank: rank, value: value, pts: pts, round: roundRef.current, found: !!found };
 
-const result = { playerName: found?.name ?? trimmed, guesserName: myName, rank, value, pts, round, found: !!found };
+var newScores = Object.assign({}, scoresRef.current);
+newScores[myName] = (newScores[myName] || 0) + pts;
+var newGuesses = allGuessesRef.current.concat([result]);
 
-setScores(prev => ({ ...prev, [myName]: (prev[myName] || 0) + pts }));
-setAllGuesses(prev => [...prev, result]);
-setRoundGuesses(prev => [...prev, result]);
-
-if (flashTimer) clearTimeout(flashTimer);
-setFlashResult(result);
-const t = setTimeout(() => setFlashResult(null), 3000);
-setFlashTimer(t);
+setScores(newScores);
+setAllGuesses(newGuesses);
 setInput('');
 
-const nextIdx = roundOrderIdx + 1;
-if (nextIdx >= totalTurnsPerRound) {
-  if (round >= rounds) {
-    setTimeout(() => onEndGame({...scores, [myName]: (scores[myName]||0)+pts }, [...allGuesses, result]), 400);
+if (flashTimerRef.current) clearTimeout(flashTimerRef.current);
+setFlashResult(result);
+flashTimerRef.current = setTimeout(function() { setFlashResult(null); }, 3000);
+
+var nextIdx = orderIdxRef.current + 1;
+if (nextIdx >= totalTurns) {
+  if (roundRef.current >= rounds) {
+    setTimeout(function() { onEndGame(newScores, newGuesses); }, 300);
   } else {
-    setRound(r => r + 1);
-    setRoundGuesses([]);
-    setRoundOrderIdx(0);
+    setRound(function(r) { return r + 1; });
+    setOrderIdx(0);
   }
 } else {
-  setRoundOrderIdx(nextIdx);
+  setOrderIdx(nextIdx);
+}
+```
+
 }
 
-setGuessSubmitting(false);
-```
+var sortedPlayers = players.slice().sort(function(a, b) { return (scores[b.name] || 0) - (scores[a.name] || 0); });
+var recentGuesses = allGuesses.slice().reverse().slice(0, 8);
 
-};
-
-// Sort players by score for scoreboard
-const sortedPlayers = […players].sort((a, b) => (scores[b.name] || 0) - (scores[a.name] || 0));
-const recentGuesses = […allGuesses].reverse().slice(0, 8);
-
-return (
-<div style={{ minHeight: ‘100vh’, padding: ‘16px 12px’ }}>
-{/* Top bar */}
-<div style={{ maxWidth: 700, margin: ‘0 auto 16px’, display: ‘flex’, alignItems: ‘center’, gap: 10, flexWrap: ‘wrap’ }}>
-<span style={{ fontFamily: ‘monospace’, color: ‘#f5c842’, fontWeight: ‘bold’, fontSize: 13, background: ‘rgba(245,200,66,0.1)’, border: ‘1px solid rgba(245,200,66,0.3)’, borderRadius: 6, padding: ‘3px 10px’ }}>{roomCode}</span>
-<span className="small muted">Round {round}/{rounds}</span>
-<span className=“small” style={{ marginLeft: ‘auto’, background: ‘rgba(255,255,255,0.06)’, borderRadius: 6, padding: ‘3px 10px’ }}>
-{stat?.label} · {period?.label}
-</span>
-</div>
-
-```
-  <div style={{ maxWidth: 700, margin: '0 auto', display: 'grid', gridTemplateColumns: players.length > 1 ? '200px 1fr' : '1fr', gap: 12, alignItems: 'start' }}>
-
-    {/* Scoreboard (left column) */}
-    {players.length > 1 && (
-      <div className="card" style={{ position: 'sticky', top: 12 }}>
-        <h3 style={{ fontSize: 14, color: '#f5c842', marginBottom: 12 }}>📊 Scores</h3>
-        {sortedPlayers.map((p) => (
-          <div key={p.name} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 0', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-            {p.name === currentPlayer?.name && <span style={{ fontSize: 12 }}>⬅</span>}
-            <span style={{ flex: 1, fontSize: 14, fontWeight: p.name === myName ? 'bold' : 'normal', color: p.name === myName ? '#f5c842' : '#f5f0e0' }}>{p.name}</span>
-            <span style={{ fontWeight: 'bold', color: '#f5c842' }}>{scores[p.name] || 0}</span>
-          </div>
-        ))}
-      </div>
-    )}
-
-    {/* Main game area */}
-    <div>
-      {/* Flash result */}
-      {flashResult && (
-        <div className="card flash-card" style={{ marginBottom: 12, borderColor: flashResult.pts > 0 ? 'rgba(80,200,100,0.5)' : 'rgba(200,80,80,0.4)', background: flashResult.pts > 0 ? 'rgba(80,200,100,0.07)' : 'rgba(200,80,80,0.07)', padding: 20, textAlign: 'center' }}>
-          <div style={{ fontSize: 15, color: 'rgba(245,240,224,0.7)', marginBottom: 4 }}>{flashResult.guesserName} guessed…</div>
-          <div style={{ fontSize: 24, fontWeight: 'bold', marginBottom: 8 }}>{flashResult.playerName}</div>
-          <div style={{ display: 'flex', justifyContent: 'center', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
-            <RankBadge rank={flashResult.rank} />
-            {flashResult.found && <span className="small" style={{ color: 'rgba(245,240,224,0.6)' }}>{stat?.fmt(flashResult.value)} {stat?.label}</span>}
-            <span style={{ fontWeight: 'bold', color: flashResult.pts > 0 ? '#50c864' : '#ff8080', fontSize: 18 }}>+{flashResult.pts} pts</span>
-          </div>
-        </div>
-      )}
-
-      {/* Turn card */}
-      <div className="card" style={{ marginBottom: 12 }}>
-        {isMyTurn ? (
-          <div>
-            <h3 style={{ fontSize: 16, color: '#f5c842', marginBottom: 14 }}>🎯 Your Turn — guess a player!</h3>
-            <div style={{ display: 'flex', gap: 10 }}>
-              <AutocompleteInput value={input} onChange={setInput} leaderboard={leaderboard} onSubmit={handleSubmit} disabled={guessSubmitting} />
-              <button className="btn-gold" style={{ whiteSpace: 'nowrap', padding: '10px 18px' }} onClick={() => handleSubmit(input)} disabled={!input.trim() || guessSubmitting}>Guess →</button>
-            </div>
-            <p className="small muted" style={{ marginTop: 8 }}>Type a player's name. Autocomplete will help. Press Enter or click Guess.</p>
-          </div>
-        ) : (
-          <div style={{ textAlign: 'center', padding: '12px 0' }}>
-            <div className="pulse-anim" style={{ fontSize: 20, marginBottom: 8 }}>⏳</div>
-            <p style={{ color: 'rgba(245,240,224,0.7)' }}>Waiting for <strong style={{ color: '#f5c842' }}>{currentPlayer?.name}</strong> to guess…</p>
-          </div>
-        )}
-      </div>
-
-      {/* Recent guesses */}
-      {recentGuesses.length > 0 && (
-        <div className="card">
-          <h3 style={{ fontSize: 14, color: '#f5c842', marginBottom: 12 }}>📝 Recent Guesses</h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-            {recentGuesses.map((g, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 10px', background: 'rgba(0,0,0,0.15)', borderRadius: 8, flexWrap: 'wrap' }}>
-                <span className="small muted">{g.guesserName}</span>
-                <span style={{ flex: 1, fontWeight: 'bold', fontSize: 14 }}>{g.playerName}</span>
-                <RankBadge rank={g.rank} />
-                {g.found && <span className="small muted">{stat?.fmt(g.value)}</span>}
-                <span style={{ fontWeight: 'bold', color: g.pts > 0 ? '#50c864' : '#ff8080', fontSize: 14 }}>+{g.pts}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Solo scoreboard (when 1 player) */}
-      {players.length === 1 && (
-        <div className="card" style={{ marginTop: 12 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span className="small muted">Your Score</span>
-            <span style={{ fontSize: 28, fontWeight: 'bold', color: '#f5c842' }}>{scores[myName] || 0}</span>
-          </div>
-          <div className="small muted" style={{ marginTop: 4 }}>Round {round}/{rounds} · Turn {(roundOrderIdx % totalTurnsPerRound) + 1}/{totalTurnsPerRound}</div>
-        </div>
-      )}
-    </div>
-  </div>
-</div>
-```
-
+return e(‘div’, { style: { minHeight: ‘100vh’, padding: ‘16px 12px’ } },
+// Top bar
+e(‘div’, { style: { maxWidth: 700, margin: ‘0 auto 16px’, display: ‘flex’, alignItems: ‘center’, gap: 10, flexWrap: ‘wrap’ } },
+e(‘span’, { style: { fontFamily: ‘monospace’, color: ‘#f5c842’, fontWeight: ‘bold’, fontSize: 13, background: ‘rgba(245,200,66,0.1)’, border: ‘1px solid rgba(245,200,66,0.3)’, borderRadius: 6, padding: ‘3px 10px’ } }, roomCode),
+e(‘span’, { className: ‘small muted’ }, ‘Round ’ + round + ‘/’ + rounds),
+e(‘span’, { className: ‘small’, style: { marginLeft: ‘auto’, background: ‘rgba(255,255,255,0.06)’, borderRadius: 6, padding: ‘3px 10px’ } },
+(stat ? stat.label : ‘’) + ’ · ’ + (period ? period.label : ‘’)
+)
+),
+e(‘div’, { style: { maxWidth: 700, margin: ‘0 auto’, display: ‘grid’, gridTemplateColumns: players.length > 1 ? ‘190px 1fr’ : ‘1fr’, gap: 12, alignItems: ‘start’ } },
+// Scoreboard column (multi-player only)
+players.length > 1 && e(‘div’, { className: ‘card’, style: { position: ‘sticky’, top: 12 } },
+e(‘h3’, { style: { fontSize: 14, color: ‘#f5c842’, marginBottom: 12 } }, ‘📊 Scores’),
+sortedPlayers.map(function(p) {
+return e(‘div’, { key: p.name, style: { display: ‘flex’, alignItems: ‘center’, gap: 8, padding: ‘7px 0’, borderBottom: ‘1px solid rgba(255,255,255,0.06)’ } },
+currentPlayer && p.name === currentPlayer.name && e(‘span’, { style: { fontSize: 12 } }, ‘⬅’),
+e(‘span’, { style: { flex: 1, fontSize: 14, fontWeight: p.name === myName ? ‘bold’ : ‘normal’, color: p.name === myName ? ‘#f5c842’ : ‘#f5f0e0’ } }, p.name),
+e(‘span’, { style: { fontWeight: ‘bold’, color: ‘#f5c842’ } }, scores[p.name] || 0)
+);
+})
+),
+// Main column
+e(‘div’, null,
+// Flash result
+flashResult && e(‘div’, { className: ‘card flash-card’, style: { marginBottom: 12, borderColor: flashResult.pts > 0 ? ‘rgba(80,200,100,0.5)’ : ‘rgba(200,80,80,0.4)’, background: flashResult.pts > 0 ? ‘rgba(80,200,100,0.07)’ : ‘rgba(200,80,80,0.07)’, padding: 20, textAlign: ‘center’ } },
+e(‘div’, { style: { fontSize: 15, color: ‘rgba(245,240,224,0.7)’, marginBottom: 4 } }, flashResult.guesserName + ’ guessed…’),
+e(‘div’, { style: { fontSize: 24, fontWeight: ‘bold’, marginBottom: 8 } }, flashResult.playerName),
+e(‘div’, { style: { display: ‘flex’, justifyContent: ‘center’, gap: 12, alignItems: ‘center’, flexWrap: ‘wrap’ } },
+e(RankBadge, { rank: flashResult.rank }),
+flashResult.found && stat && e(‘span’, { className: ‘small’, style: { color: ‘rgba(245,240,224,0.6)’ } }, stat.fmt(flashResult.value) + ’ ’ + stat.label),
+e(‘span’, { style: { fontWeight: ‘bold’, color: flashResult.pts > 0 ? ‘#50c864’ : ‘#ff8080’, fontSize: 18 } }, ‘+’ + flashResult.pts + ’ pts’)
+)
+),
+// Turn card
+e(‘div’, { className: ‘card’, style: { marginBottom: 12 } },
+isMyTurn
+? e(‘div’, null,
+e(‘h3’, { style: { fontSize: 16, color: ‘#f5c842’, marginBottom: 14 } }, ‘🎯 Your Turn — guess a player!’),
+e(‘div’, { style: { display: ‘flex’, gap: 10 } },
+e(AutocompleteInput, { value: input, onChange: setInput, leaderboard: leaderboard, onSubmit: handleSubmit }),
+e(‘button’, { className: ‘btn-gold’, style: { whiteSpace: ‘nowrap’, padding: ‘10px 18px’ }, onClick: function() { handleSubmit(input); }, disabled: !input.trim() }, ‘Guess →’)
+),
+e(‘p’, { className: ‘small muted’, style: { marginTop: 8 } }, ‘Type a name, use autocomplete, then hit Guess or Enter.’)
+)
+: e(‘div’, { style: { textAlign: ‘center’, padding: ‘12px 0’ } },
+e(‘div’, { className: ‘pulse-anim’, style: { fontSize: 20, marginBottom: 8 } }, ‘⏳’),
+e(‘p’, { style: { color: ‘rgba(245,240,224,0.7)’ } }, ’Waiting for ‘, e(‘strong’, { style: { color: ‘#f5c842’ } }, currentPlayer ? currentPlayer.name : ‘…’), ’ to guess…’)
+)
+),
+// Recent guesses
+recentGuesses.length > 0 && e(‘div’, { className: ‘card’ },
+e(‘h3’, { style: { fontSize: 14, color: ‘#f5c842’, marginBottom: 12 } }, ‘📝 Recent Guesses’),
+e(‘div’, { style: { display: ‘flex’, flexDirection: ‘column’, gap: 6 } },
+recentGuesses.map(function(g, i) {
+return e(‘div’, { key: i, style: { display: ‘flex’, alignItems: ‘center’, gap: 8, padding: ‘7px 10px’, background: ‘rgba(0,0,0,0.15)’, borderRadius: 8, flexWrap: ‘wrap’ } },
+e(‘span’, { className: ‘small muted’ }, g.guesserName),
+e(‘span’, { style: { flex: 1, fontWeight: ‘bold’, fontSize: 14 } }, g.playerName),
+e(RankBadge, { rank: g.rank }),
+g.found && stat && e(‘span’, { className: ‘small muted’ }, stat.fmt(g.value)),
+e(‘span’, { style: { fontWeight: ‘bold’, color: g.pts > 0 ? ‘#50c864’ : ‘#ff8080’, fontSize: 14 } }, ‘+’ + g.pts)
+);
+})
+)
+),
+// Solo score display
+players.length === 1 && e(‘div’, { className: ‘card’, style: { marginTop: 12 } },
+e(‘div’, { style: { display: ‘flex’, justifyContent: ‘space-between’, alignItems: ‘center’ } },
+e(‘span’, { className: ‘small muted’ }, ‘Your Score’),
+e(‘span’, { style: { fontSize: 28, fontWeight: ‘bold’, color: ‘#f5c842’ } }, scores[myName] || 0)
+),
+e(‘div’, { className: ‘small muted’, style: { marginTop: 4 } }, ’Round ’ + round + ‘/’ + rounds)
+)
+)
+)
 );
 }
 
-// ─── END SCREEN ───────────────────────────────────────────────────────────────
+// ── END SCREEN ────────────────────────────────────────────────────────────────
 
-function EndScreen({ players, scores, allGuesses, settings, onPlayAgain }) {
-const stat = ALL_STATS.find(s => s.api === settings.statKey);
-const period = TIME_PERIODS.find(p => p.value === settings.timePeriod);
-const sorted = […players].sort((a, b) => (scores[b.name] || 0) - (scores[a.name] || 0));
-const winner = sorted[0];
+function EndScreen(props) {
+var players = props.players, scores = props.scores, allGuesses = props.allGuesses, settings = props.settings;
+var stat = findStat(settings.statKey);
+var period = findPeriod(settings.timePeriod);
+var sorted = players.slice().sort(function(a, b) { return (scores[b.name] || 0) - (scores[a.name] || 0); });
+var winner = sorted[0];
 
-return (
-<div style={{ minHeight: ‘100vh’, padding: ‘24px 16px’ }}>
-<div style={{ maxWidth: 600, margin: ‘0 auto’ }}>
-{/* Winner */}
-<div className=“card fade-in” style={{ textAlign: ‘center’, marginBottom: 20, borderColor: ‘rgba(245,200,66,0.4)’, background: ‘rgba(245,200,66,0.05)’, padding: 32 }}>
-<div style={{ fontSize: 56, marginBottom: 8 }}>🏆</div>
-<h2 style={{ fontSize: 28, color: ‘#f5c842’ }}>{winner?.name} Wins!</h2>
-<div style={{ fontSize: 44, fontWeight: ‘bold’, marginTop: 8 }}>{scores[winner?.name] || 0} pts</div>
-<p className=“small muted” style={{ marginTop: 8 }}>{stat?.label} · {period?.label}</p>
-</div>
-
-```
-    {/* Final scores */}
-    <div className="card fade-in" style={{ marginBottom: 20 }}>
-      <h3 style={{ color: '#f5c842', marginBottom: 14 }}>📊 Final Scores</h3>
-      {sorted.map((p, i) => (
-        <div key={p.name} style={{ display: 'flex', gap: 12, alignItems: 'center', padding: '10px 0', borderBottom: i < sorted.length - 1 ? '1px solid rgba(255,255,255,0.08)' : 'none' }}>
-          <span style={{ width: 24, color: i === 0 ? '#f5c842' : 'rgba(245,240,224,0.4)', fontWeight: 'bold' }}>#{i+1}</span>
-          <span style={{ flex: 1, fontSize: 16 }}>{p.name}</span>
-          <span style={{ fontWeight: 'bold', fontSize: 20, color: '#f5c842' }}>{scores[p.name] || 0}</span>
-        </div>
-      ))}
-    </div>
-
-    {/* Full guess history */}
-    <div className="card fade-in" style={{ marginBottom: 24 }}>
-      <h3 style={{ color: '#f5c842', marginBottom: 14 }}>📝 Full Guess History</h3>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxHeight: 400, overflowY: 'auto' }}>
-        {allGuesses.map((g, i) => (
-          <div key={i} style={{ display: 'grid', gridTemplateColumns: '80px 1fr auto auto auto', gap: 8, alignItems: 'center', padding: '8px 10px', background: 'rgba(0,0,0,0.15)', borderRadius: 8, flexWrap: 'wrap' }}>
-            <span className="small muted">R{g.round} · {g.guesserName}</span>
-            <span style={{ fontWeight: 'bold', fontSize: 14 }}>{g.playerName}</span>
-            <RankBadge rank={g.rank} />
-            {g.found && <span className="small muted">{stat?.fmt(g.value)}</span>}
-            <span style={{ fontWeight: 'bold', color: g.pts > 0 ? '#50c864' : '#ff8080' }}>+{g.pts}</span>
-          </div>
-        ))}
-      </div>
-    </div>
-
-    <button className="btn-gold" style={{ width: '100%', padding: 14, fontSize: 17 }} onClick={onPlayAgain}>🏠 Play Again</button>
-  </div>
-</div>
-```
-
+return e(‘div’, { style: { minHeight: ‘100vh’, padding: ‘24px 16px’ } },
+e(‘div’, { style: { maxWidth: 600, margin: ‘0 auto’ } },
+e(‘div’, { className: ‘card fade-in’, style: { textAlign: ‘center’, marginBottom: 20, borderColor: ‘rgba(245,200,66,0.4)’, background: ‘rgba(245,200,66,0.05)’, padding: 32 } },
+e(‘div’, { style: { fontSize: 56, marginBottom: 8 } }, ‘🏆’),
+e(‘h2’, { style: { fontSize: 28, color: ‘#f5c842’ } }, (winner ? winner.name : ‘’) + ’ Wins!’),
+e(‘div’, { style: { fontSize: 44, fontWeight: ‘bold’, marginTop: 8 } }, (scores[winner && winner.name] || 0) + ’ pts’),
+e(‘p’, { className: ‘small muted’, style: { marginTop: 8 } }, (stat ? stat.label : ‘’) + ’ · ’ + (period ? period.label : ‘’))
+),
+e(‘div’, { className: ‘card fade-in’, style: { marginBottom: 20 } },
+e(‘h3’, { style: { color: ‘#f5c842’, marginBottom: 14 } }, ‘📊 Final Scores’),
+sorted.map(function(p, i) {
+return e(‘div’, { key: p.name, style: { display: ‘flex’, gap: 12, alignItems: ‘center’, padding: ‘10px 0’, borderBottom: i < sorted.length - 1 ? ‘1px solid rgba(255,255,255,0.08)’ : ‘none’ } },
+e(‘span’, { style: { width: 24, color: i === 0 ? ‘#f5c842’ : ‘rgba(245,240,224,0.4)’, fontWeight: ‘bold’ } }, ‘#’ + (i + 1)),
+e(‘span’, { style: { flex: 1, fontSize: 16 } }, p.name),
+e(‘span’, { style: { fontWeight: ‘bold’, fontSize: 20, color: ‘#f5c842’ } }, scores[p.name] || 0)
+);
+})
+),
+e(‘div’, { className: ‘card fade-in’, style: { marginBottom: 24 } },
+e(‘h3’, { style: { color: ‘#f5c842’, marginBottom: 14 } }, ‘📝 Full Guess History’),
+e(‘div’, { style: { display: ‘flex’, flexDirection: ‘column’, gap: 6, maxHeight: 400, overflowY: ‘auto’ } },
+allGuesses.map(function(g, i) {
+return e(‘div’, { key: i, style: { display: ‘flex’, alignItems: ‘center’, gap: 8, padding: ‘8px 10px’, background: ‘rgba(0,0,0,0.15)’, borderRadius: 8, flexWrap: ‘wrap’ } },
+e(‘span’, { className: ‘small muted’, style: { minWidth: 80 } }, ‘R’ + g.round + ’ · ’ + g.guesserName),
+e(‘span’, { style: { flex: 1, fontWeight: ‘bold’, fontSize: 14 } }, g.playerName),
+e(RankBadge, { rank: g.rank }),
+g.found && stat && e(‘span’, { className: ‘small muted’ }, stat.fmt(g.value)),
+e(‘span’, { style: { fontWeight: ‘bold’, color: g.pts > 0 ? ‘#50c864’ : ‘#ff8080’ } }, ‘+’ + g.pts)
+);
+})
+)
+),
+e(‘button’, { className: ‘btn-gold’, style: { width: ‘100%’, padding: 14, fontSize: 17 }, onClick: props.onPlayAgain }, ‘🏠 Play Again’)
+)
 );
 }
 
-// ─── ROOT APP ─────────────────────────────────────────────────────────────────
+// ── ROOT APP ──────────────────────────────────────────────────────────────────
 
 function App() {
-const [screen, setScreen] = useState(‘home’); // home | lobby | game | end
-const [myName, setMyName] = useState(’’);
-const [roomCode, setRoomCode] = useState(’’);
-const [isHost, setIsHost] = useState(false);
-const [leaderboard, setLeaderboard] = useState(null);
-const [endData, setEndData] = useState(null);
-const [error, setError] = useState(null);
-const bc = useRef(null);
+var s1 = useState(‘home’); var screen = s1[0]; var setScreen = s1[1];
+var s2 = useState(’’); var myName = s2[0]; var setMyName = s2[1];
+var s3 = useState(’’); var roomCode = s3[0]; var setRoomCode = s3[1];
+var s4 = useState(false); var isHost = s4[0]; var setIsHost = s4[1];
+var s5 = useState(null); var leaderboard = s5[0]; var setLeaderboard = s5[1];
+var s6 = useState(null); var endData = s6[0]; var setEndData = s6[1];
+var s7 = useState(null); var error = s7[0]; var setError = s7[1];
 
-useEffect(() => {
-bc.current = new BroadcastChannel(‘the100game’);
-return () => bc.current?.close();
-}, []);
-
-const broadcast = (msg) => bc.current?.postMessage(msg);
-
-const createRoom = (name) => {
-const code = rand4();
-const room = {
-code,
-host: name,
-players: [{ name }],
-settings: {
-statKey: ‘homeRuns’,
-timePeriod: ‘last5’,
-rounds: 3,
-guessesPerRound: 2,
-},
-state: ‘lobby’,
-leaderboard: null,
-createdAt: Date.now(),
-};
-setRoom(code, room);
-setMyName(name);
-setRoomCode(code);
-setIsHost(true);
-setScreen(‘lobby’);
-};
-
-const joinRoom = (name, code) => {
-const room = getRoom(code);
-if (!room) { setError(‘Room not found. Check the code and try again.’); return; }
-if (room.state !== ‘lobby’) { setError(‘Game already in progress.’); return; }
-
-```
-// Add player if not already there
-const players = room.players || [];
-if (!players.find(p => p.name === name)) {
-  const updatedRoom = { ...room, players: [...players, { name }] };
-  setRoom(code, updatedRoom);
-  broadcast({ roomCode: code });
-}
-
-setMyName(name);
-setRoomCode(code);
-setIsHost(false);
-setScreen('lobby');
-setError(null);
-```
-
-};
-
-const startGame = (lb) => {
-const room = getRoom(roomCode);
-setRoom(roomCode, { …room, state: ‘game’, leaderboard: lb });
-broadcast({ roomCode, action: ‘start’ });
-setLeaderboard(lb);
-setScreen(‘game’);
-};
-
-const endGame = (finalScores, finalGuesses) => {
-const room = getRoom(roomCode);
-if (room) setRoom(roomCode, { …room, state: ‘ended’ });
-setEndData({ scores: finalScores, guesses: finalGuesses, settings: room?.settings });
-setScreen(‘end’);
-};
-
-const playAgain = () => {
-setLeaderboard(null);
-setEndData(null);
-setRoomCode(’’);
-setIsHost(false);
-setScreen(‘home’);
-};
-
-// Poll for game start (non-host)
-useEffect(() => {
+// Poll for game start (non-host players waiting in lobby)
+useEffect(function() {
 if (screen !== ‘lobby’ || isHost) return;
-const checkStart = () => {
-const room = getRoom(roomCode);
-if (room?.state === ‘game’ && room?.leaderboard) {
-setLeaderboard(room.leaderboard);
+var iv = setInterval(function() {
+var r = getRoom(roomCode);
+if (r && r.state === ‘game’ && r.leaderboard) {
+setLeaderboard(r.leaderboard);
 setScreen(‘game’);
 }
-};
-const iv = setInterval(checkStart, 800);
-const b = new BroadcastChannel(‘the100game’);
-b.onmessage = (e) => { if (e.data?.roomCode === roomCode && e.data?.action === ‘start’) checkStart(); };
-return () => { clearInterval(iv); b.close(); };
+}, 1000);
+return function() { clearInterval(iv); };
 }, [screen, isHost, roomCode]);
 
-const room = roomCode ? getRoom(roomCode) : null;
-const roomPlayers = room?.players || [];
-const roomSettings = room?.settings || {};
+function createRoom(name) {
+var code = rand4();
+setRoom(code, { code: code, host: name, players: [{ name: name }], settings: { statKey: ‘homeRuns’, timePeriod: ‘last5’, rounds: 3, guessesPerRound: 2 }, state: ‘lobby’, leaderboard: null, createdAt: Date.now() });
+setMyName(name); setRoomCode(code); setIsHost(true); setScreen(‘lobby’);
+}
 
-return (
-<div>
-{/* Error banner */}
-{error && (
-<div style={{ position: ‘fixed’, top: 0, left: 0, right: 0, background: ‘rgba(200,80,80,0.9)’, color: ‘#fff’, padding: ‘12px 20px’, zIndex: 999, display: ‘flex’, justifyContent: ‘space-between’, alignItems: ‘center’, fontSize: 14 }}>
-<span>⚠️ {error}</span>
-<button onClick={() => setError(null)} style={{ background: ‘transparent’, color: ‘#fff’, fontSize: 18, lineHeight: 1 }}>✕</button>
-</div>
-)}
+function joinRoom(name, code) {
+var room = getRoom(code);
+if (!room) { setError(‘Room not found. Check the code.’); return; }
+if (room.state !== ‘lobby’) { setError(‘Game already in progress.’); return; }
+var players = room.players || [];
+if (!players.find(function(p) { return p.name === name; })) {
+setRoom(code, Object.assign({}, room, { players: players.concat([{ name: name }]) }));
+}
+setMyName(name); setRoomCode(code); setIsHost(false); setScreen(‘lobby’); setError(null);
+}
 
-```
-  {screen === 'home' && <HomeScreen onCreateRoom={createRoom} onJoinRoom={joinRoom} />}
+function startGame(lb) {
+var room = getRoom(roomCode);
+setRoom(roomCode, Object.assign({}, room, { state: ‘game’, leaderboard: lb }));
+setLeaderboard(lb); setScreen(‘game’);
+}
 
-  {screen === 'lobby' && (
-    <LobbyScreen
-      roomCode={roomCode}
-      myName={myName}
-      isHost={isHost}
-      onStartGame={startGame}
-      onLeave={() => {
-        // Remove player from room
-        const r = getRoom(roomCode);
-        if (r) setRoom(roomCode, { ...r, players: (r.players||[]).filter(p => p.name !== myName) });
-        playAgain();
-      }}
-    />
-  )}
+function endGame(finalScores, finalGuesses) {
+var room = getRoom(roomCode);
+if (room) setRoom(roomCode, Object.assign({}, room, { state: ‘ended’ }));
+setEndData({ scores: finalScores, guesses: finalGuesses, settings: room ? room.settings : {} });
+setScreen(‘end’);
+}
 
-  {screen === 'game' && leaderboard && (
-    <GameScreen
-      roomCode={roomCode}
-      myName={myName}
-      leaderboard={leaderboard}
-      settings={roomSettings}
-      players={roomPlayers}
-      onEndGame={endGame}
-    />
-  )}
+function playAgain() {
+setLeaderboard(null); setEndData(null); setRoomCode(’’); setIsHost(false); setScreen(‘home’);
+}
 
-  {screen === 'end' && endData && (
-    <EndScreen
-      players={roomPlayers}
-      scores={endData.scores}
-      allGuesses={endData.guesses}
-      settings={endData.settings || roomSettings}
-      onPlayAgain={playAgain}
-    />
-  )}
+var room = roomCode ? getRoom(roomCode) : null;
+var roomPlayers = (room && room.players) ? room.players : [];
+var roomSettings = (room && room.settings) ? room.settings : {};
 
-  {/* Watermark */}
-  <div style={{ position: 'fixed', bottom: 12, right: 16, fontSize: 11, color: 'rgba(245,240,224,0.2)', pointerEvents: 'none', userSelect: 'none', fontFamily: 'Georgia, serif' }}>The 100 Game ⚾</div>
-</div>
-```
+return e(‘div’, null,
+error && e(‘div’, { style: { position: ‘fixed’, top: 0, left: 0, right: 0, background: ‘rgba(200,80,80,0.95)’, color: ‘#fff’, padding: ‘12px 20px’, zIndex: 999, display: ‘flex’, justifyContent: ‘space-between’, alignItems: ‘center’, fontSize: 14 } },
+e(‘span’, null, ’⚠️ ’ + error),
+e(‘button’, { onClick: function() { setError(null); }, style: { background: ‘transparent’, color: ‘#fff’, fontSize: 18, lineHeight: 1, cursor: ‘pointer’, border: ‘none’ } }, ‘✕’)
+),
+screen === ‘home’ && e(HomeScreen, { onCreateRoom: createRoom, onJoinRoom: joinRoom }),
+screen === ‘lobby’ && e(LobbyScreen, { roomCode: roomCode, myName: myName, isHost: isHost, onStartGame: startGame,
+onLeave: function() {
+var r = getRoom(roomCode);
+if (r) setRoom(roomCode, Object.assign({}, r, { players: (r.players || []).filter(function(p) { return p.name !== myName; }) }));
+playAgain();
+}
+}),
+screen === ‘game’ && leaderboard && e(GameScreen, { roomCode: roomCode, myName: myName, leaderboard: leaderboard, settings: roomSettings, players: roomPlayers, onEndGame: endGame }),
+screen === ‘end’ && endData && e(EndScreen, { players: roomPlayers, scores: endData.scores, allGuesses: endData.guesses, settings: endData.settings || roomSettings, onPlayAgain: playAgain }),
+e(‘div’, { style: { position: ‘fixed’, bottom: 12, right: 16, fontSize: 11, color: ‘rgba(245,240,224,0.2)’, pointerEvents: ‘none’, userSelect: ‘none’ } }, ‘The 100 Game ⚾’)
+);
+}
+
+ReactDOM.createRoot(document.getElementById(‘root’)).render(e(App, null));
+</script>
+
+</body>
+</html>

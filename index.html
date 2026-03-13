@@ -2,779 +2,728 @@
 
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>The 100 Game · Baseball Trivia</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%}
-body{font-family:Georgia,serif;background:linear-gradient(160deg,#1a3a2a 0%,#0d2418 55%,#0a1e14 100%);background-attachment:fixed;color:#f5f0e0;min-height:100vh;overflow-x:hidden}
-#root{min-height:100vh}
+html,body{height:100%;font-family:Georgia,serif;background:linear-gradient(160deg,#1a3a2a 0%,#0d2418 55%,#0a1e14 100%);color:#f5f0e0;min-height:100vh;overflow-x:hidden}
 ::-webkit-scrollbar{width:6px}
-::-webkit-scrollbar-track{background:rgba(0,0,0,.2)}
 ::-webkit-scrollbar-thumb{background:rgba(245,200,66,.4);border-radius:3px}
-@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
-@keyframes slideDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
-@keyframes flashIn{0%{opacity:0;transform:scale(.92) translateY(-10px)}60%{transform:scale(1.03) translateY(0)}100%{opacity:1;transform:scale(1)}}
-@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
-.fade-in{animation:fadeIn .4s ease forwards}
-.flash-card{animation:flashIn .35s cubic-bezier(.22,1,.36,1) forwards}
-.slide-down{animation:slideDown .2s ease forwards}
-.pulse-anim{animation:pulse 1.5s ease-in-out infinite}
-.spin{animation:spin 1s linear infinite}
-input,select,button{font-family:Georgia,serif;outline:none}
-input[type=text],input[type=number],select{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.18);border-radius:8px;color:#f5f0e0;padding:10px 14px;font-size:15px;width:100%;transition:border-color .2s}
-input[type=text]:focus,input[type=number]:focus,select:focus{border-color:#f5c842}
-select option{background:#0d2418;color:#f5f0e0}
-button{cursor:pointer;border:none;border-radius:8px;font-size:15px;padding:10px 20px;transition:all .18s}
-button:active{transform:scale(.97)}
-button:disabled{opacity:.45;cursor:not-allowed;transform:none}
-.btn-gold{background:linear-gradient(135deg,#f5c842 0%,#e6a820 100%);color:#0d2418;font-weight:bold;letter-spacing:.02em}
-.btn-gold:hover:not(:disabled){filter:brightness(1.1);box-shadow:0 4px 16px rgba(245,200,66,.35)}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes flashIn{0%{opacity:0;transform:scale(.93)}60%{transform:scale(1.02)}100%{opacity:1;transform:scale(1)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.fadein{animation:fadeIn .35s ease forwards}
+.flashin{animation:flashIn .3s ease forwards}
+.spinner{width:22px;height:22px;border:2px solid rgba(255,255,255,.2);border-top-color:#f5c842;border-radius:50%;animation:spin 1s linear infinite;display:inline-block;vertical-align:middle}
+.dot{width:8px;height:8px;border-radius:50%;background:#50c864;display:inline-block;animation:pulse 1.4s ease-in-out infinite}
+input,select,button{font-family:Georgia,serif}
+input[type=text],select{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.2);border-radius:8px;color:#f5f0e0;padding:10px 14px;font-size:15px;width:100%;outline:none;transition:border-color .2s}
+input[type=text]:focus,select:focus{border-color:#f5c842}
+select option{background:#0d2418}
+button{cursor:pointer;border:none;border-radius:8px;font-size:15px;padding:10px 20px;transition:all .15s;font-family:Georgia,serif}
+button:disabled{opacity:.4;cursor:not-allowed}
+.btn-gold{background:linear-gradient(135deg,#f5c842,#e6a820);color:#0d2418;font-weight:bold}
+.btn-gold:hover:not(:disabled){filter:brightness(1.08);box-shadow:0 4px 14px rgba(245,200,66,.3)}
 .btn-outline{background:transparent;border:1px solid rgba(255,255,255,.3);color:#f5f0e0}
 .btn-outline:hover:not(:disabled){border-color:#f5c842;color:#f5c842}
 .card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:20px}
-.badge-hit{background:rgba(80,200,100,.18);border:1px solid rgba(80,200,100,.4);color:#7fffa0;border-radius:6px;padding:2px 8px;font-size:13px;display:inline-block}
-.badge-miss{background:rgba(200,80,80,.18);border:1px solid rgba(200,80,80,.4);color:#ff9999;border-radius:6px;padding:2px 8px;font-size:13px;display:inline-block}
-.room-code{font-family:'Courier New',monospace;color:#f5c842;font-size:42px;font-weight:bold;letter-spacing:10px;text-shadow:0 0 30px rgba(245,200,66,.4)}
-.autocomplete-list{position:absolute;z-index:100;width:100%;background:#122a1c;border:1px solid rgba(245,200,66,.4);border-radius:8px;max-height:220px;overflow-y:auto;top:calc(100% + 4px);left:0}
-.autocomplete-item{padding:9px 14px;cursor:pointer;font-size:14px;border-bottom:1px solid rgba(255,255,255,.06);transition:background .12s}
-.autocomplete-item:hover,.autocomplete-item.selected{background:rgba(245,200,66,.15);color:#f5c842}
-.autocomplete-item:last-child{border-bottom:none}
-.progress-track{background:rgba(255,255,255,.1);border-radius:4px;height:6px;overflow:hidden}
-.progress-fill{height:100%;background:linear-gradient(90deg,#f5c842,#e6a820);border-radius:4px;transition:width .3s}
-label{display:block;font-size:13px;color:rgba(245,240,224,.6);margin-bottom:6px;letter-spacing:.04em;text-transform:uppercase}
+.card-gold{border-color:rgba(245,200,66,.4);background:rgba(245,200,66,.04)}
+.badge-hit{background:rgba(80,200,100,.18);border:1px solid rgba(80,200,100,.4);color:#7fffa0;border-radius:6px;padding:2px 9px;font-size:13px}
+.badge-miss{background:rgba(200,80,80,.18);border:1px solid rgba(200,80,80,.4);color:#ff9999;border-radius:6px;padding:2px 9px;font-size:13px}
+.muted{color:rgba(245,240,224,.5);font-size:13px}
 .gold{color:#f5c842}
-.muted{color:rgba(245,240,224,.5)}
-.small{font-size:13px}
+.room-code{font-family:'Courier New',monospace;color:#f5c842;font-size:44px;font-weight:bold;letter-spacing:12px;text-shadow:0 0 24px rgba(245,200,66,.35)}
+.progress-track{background:rgba(255,255,255,.1);border-radius:4px;height:6px;overflow:hidden;margin-top:8px}
+.progress-fill{height:100%;background:linear-gradient(90deg,#f5c842,#e6a820);border-radius:4px;transition:width .3s}
+label{display:block;font-size:12px;color:rgba(245,240,224,.55);margin-bottom:6px;letter-spacing:.05em;text-transform:uppercase}
+.autocomplete-box{position:absolute;left:0;right:0;top:calc(100% + 3px);background:#122a1c;border:1px solid rgba(245,200,66,.4);border-radius:8px;z-index:99;max-height:210px;overflow-y:auto}
+.ac-item{padding:9px 14px;cursor:pointer;font-size:14px;border-bottom:1px solid rgba(255,255,255,.06)}
+.ac-item:last-child{border-bottom:none}
+.ac-item:hover,.ac-item.active{background:rgba(245,200,66,.15);color:#f5c842}
+.tab-row{display:flex;gap:8px;background:rgba(0,0,0,.2);border-radius:10px;padding:4px;margin-bottom:22px}
+.tab-btn{flex:1;padding:10px;border-radius:7px;font-size:15px;font-weight:bold;cursor:pointer;border:1px solid transparent;transition:all .2s;font-family:Georgia,serif}
+.tab-btn.active{background:rgba(245,200,66,.2);border-color:rgba(245,200,66,.5);color:#f5c842}
+.tab-btn:not(.active){background:transparent;color:rgba(245,240,224,.5)}
+.center-wrap{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
 </style>
 </head>
 <body>
-<div id="root"></div>
+<div id="app"></div>
 <script>
 'use strict';
-var e = React.createElement;
-var useState = React.useState;
-var useEffect = React.useEffect;
-var useRef = React.useRef;
-var useMemo = React.useMemo;
 
-// ── CONSTANTS ────────────────────────────────────────────────────────────────
-
-var STAT_CATEGORIES = [
-{ group: ‘Batting’, stats: [
-{ label: ‘Home Runs’,    api: ‘homeRuns’,           statGroup: ‘hitting’,  fmt: function(v){ return v; } },
-{ label: ‘RBI’,          api: ‘rbi’,                statGroup: ‘hitting’,  fmt: function(v){ return v; } },
-{ label: ‘Hits’,         api: ‘hits’,               statGroup: ‘hitting’,  fmt: function(v){ return v; } },
-{ label: ‘Batting Avg’,  api: ‘battingAverage’,     statGroup: ‘hitting’,  fmt: function(v){ return parseFloat(v).toFixed(3); } },
-{ label: ‘OPS’,          api: ‘onBasePlusSlugging’, statGroup: ‘hitting’,  fmt: function(v){ return parseFloat(v).toFixed(3); } },
-{ label: ‘Stolen Bases’, api: ‘stolenBases’,        statGroup: ‘hitting’,  fmt: function(v){ return v; } },
-]},
-{ group: ‘Pitching’, stats: [
-{ label: ‘Wins’,         api: ‘wins’,               statGroup: ‘pitching’, fmt: function(v){ return v; } },
-{ label: ‘ERA’,          api: ‘earnedRunAverage’,   statGroup: ‘pitching’, fmt: function(v){ return parseFloat(v).toFixed(2); } },
-{ label: ‘Strikeouts’,   api: ‘strikeouts’,         statGroup: ‘pitching’, fmt: function(v){ return v; } },
-{ label: ‘Saves’,        api: ‘saves’,              statGroup: ‘pitching’, fmt: function(v){ return v; } },
-]},
+// ── CONSTANTS ─────────────────────────────────────────────────────────────────
+var STATS = [
+{group:‘Batting’, label:‘Home Runs’,    api:‘homeRuns’,           sg:‘hitting’,  fmt:function(v){return Math.round(v);}},
+{group:‘Batting’, label:‘RBI’,          api:‘rbi’,                sg:‘hitting’,  fmt:function(v){return Math.round(v);}},
+{group:‘Batting’, label:‘Hits’,         api:‘hits’,               sg:‘hitting’,  fmt:function(v){return Math.round(v);}},
+{group:‘Batting’, label:‘Batting Avg’,  api:‘battingAverage’,     sg:‘hitting’,  fmt:function(v){return parseFloat(v).toFixed(3);}},
+{group:‘Batting’, label:‘OPS’,          api:‘onBasePlusSlugging’, sg:‘hitting’,  fmt:function(v){return parseFloat(v).toFixed(3);}},
+{group:‘Batting’, label:‘Stolen Bases’, api:‘stolenBases’,        sg:‘hitting’,  fmt:function(v){return Math.round(v);}},
+{group:‘Pitching’,label:‘Wins’,         api:‘wins’,               sg:‘pitching’, fmt:function(v){return Math.round(v);}},
+{group:‘Pitching’,label:‘ERA’,          api:‘earnedRunAverage’,   sg:‘pitching’, fmt:function(v){return parseFloat(v).toFixed(2);}},
+{group:‘Pitching’,label:‘Strikeouts’,   api:‘strikeouts’,         sg:‘pitching’, fmt:function(v){return Math.round(v);}},
+{group:‘Pitching’,label:‘Saves’,        api:‘saves’,              sg:‘pitching’, fmt:function(v){return Math.round(v);}},
 ];
-
-var ALL_STATS = [];
-STAT_CATEGORIES.forEach(function(g) {
-g.stats.forEach(function(s) { ALL_STATS.push(Object.assign({}, s, { group: g.group })); });
-});
-
-var TIME_PERIODS = [
-{ label: ‘Last 5 Years’,  value: ‘last5’,    startYear: new Date().getFullYear() - 5 },
-{ label: ‘Since 2000’,    value: ‘since2000’, startYear: 2000 },
-{ label: ‘Since 1990’,    value: ‘since1990’, startYear: 1990 },
-{ label: ‘All Time’,      value: ‘alltime’,   startYear: 1969 },
+var PERIODS = [
+{label:‘Last 5 Years’, value:‘last5’,    start: new Date().getFullYear()-5},
+{label:‘Since 2000’,   value:‘since2000’,start:2000},
+{label:‘Since 1990’,   value:‘since1990’,start:1990},
+{label:‘All Time’,     value:‘alltime’,  start:1969},
 ];
+var RATE_STATS = {battingAverage:1,onBasePlusSlugging:1,earnedRunAverage:1};
+var CUR_YEAR = new Date().getFullYear() - 1;
 
-var currentYear = new Date().getFullYear() - 1;
-var RATE_STATS = { battingAverage: true, onBasePlusSlugging: true, earnedRunAverage: true };
-
-// ── UTILS ─────────────────────────────────────────────────────────────────────
-
-function rand4() {
-var chars = ‘ABCDEFGHJKLMNPQRSTUVWXYZ23456789’;
-var out = ‘’;
-for (var i = 0; i < 4; i++) out += chars[Math.floor(Math.random() * chars.length)];
-return out;
+// ── HELPERS ───────────────────────────────────────────────────────────────────
+function rand4(){
+var c=‘ABCDEFGHJKLMNPQRSTUVWXYZ23456789’,o=’’;
+for(var i=0;i<4;i++) o+=c[Math.floor(Math.random()*c.length)];
+return o;
 }
-
-function normalizeName(name) {
-return name.toLowerCase().trim()
-.normalize(‘NFD’).replace(/[\u0300-\u036f]/g, ‘’)
-.replace(/[^a-z0-9 ]/g, ‘’);
+function normName(s){
+return (s||’’).toLowerCase().trim().normalize(‘NFD’)
+.replace(/[\u0300-\u036f]/g,’’).replace(/[^a-z0-9 ]/g,’’);
 }
-
-function findStat(apiKey) {
-for (var i = 0; i < ALL_STATS.length; i++) { if (ALL_STATS[i].api === apiKey) return ALL_STATS[i]; }
-return null;
+function getStat(api){for(var i=0;i<STATS.length;i++){if(STATS[i].api===api)return STATS[i];}return null;}
+function getPeriod(v){for(var i=0;i<PERIODS.length;i++){if(PERIODS[i].value===v)return PERIODS[i];}return null;}
+function buildSnake(n,gpr){
+var o=[];
+for(var g=0;g<gpr;g++){
+if(g%2===0){for(var p=0;p<n;p++)o.push(p);}
+else{for(var p=n-1;p>=0;p–)o.push(p);}
 }
-
-function findPeriod(val) {
-for (var i = 0; i < TIME_PERIODS.length; i++) { if (TIME_PERIODS[i].value === val) return TIME_PERIODS[i]; }
+return o;
+}
+function lookupInLB(name,lb){
+var n=normName(name);
+for(var i=0;i<lb.length;i++){if(normName(lb[i].name)===n)return lb[i];}
+for(var i=0;i<lb.length;i++){if(normName(lb[i].name).indexOf(n)!==-1)return lb[i];}
 return null;
 }
 
 // ── STORAGE ───────────────────────────────────────────────────────────────────
-
-var STORAGE_KEY = ‘the100game_rooms’;
-function getRooms() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || ‘{}’); } catch(err) { return {}; } }
-function saveRooms(r) { localStorage.setItem(STORAGE_KEY, JSON.stringify(r)); }
-function getRoom(code) { return getRooms()[code] || null; }
-function setRoom(code, data) {
-var rooms = getRooms();
-rooms[code] = Object.assign({}, data, { updatedAt: Date.now() });
-saveRooms(rooms);
-}
-function updateRoomSetting(code, key, val) {
-var rooms = getRooms();
-if (!rooms[code]) return;
-if (!rooms[code].settings) rooms[code].settings = {};
-rooms[code].settings[key] = val;
-rooms[code].updatedAt = Date.now();
-saveRooms(rooms);
+var SK=‘the100game_v2’;
+function loadAll(){try{return JSON.parse(localStorage.getItem(SK)||’{}’)}catch(e){return{};}}
+function saveAll(o){try{localStorage.setItem(SK,JSON.stringify(o));}catch(e){}}
+function getRoom(code){return loadAll()[code]||null;}
+function setRoom(code,data){var a=loadAll();a[code]=Object.assign({},data,{ts:Date.now()});saveAll(a);}
+function patchSetting(code,key,val){
+var a=loadAll();if(!a[code])return;
+a[code].settings=a[code].settings||{};
+a[code].settings[key]=val;a[code].ts=Date.now();saveAll(a);
 }
 
 // ── API ───────────────────────────────────────────────────────────────────────
+function fetchOneSeason(api,sg,year){
+var url=‘https://statsapi.mlb.com/api/v1/stats/leaders?leaderCategories=’+api
++’&season=’+year+’&leaderGameTypes=R&limit=500&statGroup=’+sg;
+return fetch(url)
+.then(function(r){if(!r.ok)throw new Error(‘HTTP ‘+r.status);return r.json();})
+.then(function(d){
+var rows=(d.leagueLeaders&&d.leagueLeaders[0]&&d.leagueLeaders[0].leaders)||[];
+return rows.map(function(l){
+return{name:(l.person&&l.person.fullName)||’’,id:l.person&&l.person.id,val:parseFloat(l.value||0)};
+});
+});
+}
 
-function fetchSingleSeason(leaderCategory, statGroup, season) {
-var url = ‘https://statsapi.mlb.com/api/v1/stats/leaders?leaderCategories=’ + leaderCategory +
-‘&season=’ + season + ‘&leaderGameTypes=R&limit=500&statGroup=’ + statGroup;
-return fetch(url).then(function(res) {
-if (!res.ok) throw new Error(’HTTP ’ + res.status);
-return res.json();
-}).then(function(data) {
-var leaders = (data.leagueLeaders && data.leagueLeaders[0] && data.leagueLeaders[0].leaders) || [];
-return leaders.map(function(l) {
-return {
-name: (l.person && l.person.fullName) || ‘’,
-playerId: l.person && l.person.id,
-value: parseFloat(l.value || 0)
+function buildLB(api,sg,startYear,onPct){
+var seasons=[],map={};
+for(var y=startYear;y<=CUR_YEAR;y++)seasons.push(y);
+var isRate=!!RATE_STATS[api];
+function step(i){
+if(i>=seasons.length){
+var players=Object.keys(map).map(function(k){return map[k];});
+if(isRate){
+players=players.map(function(p){
+var avg=p.vals.length?p.vals.reduce(function(a,b){return a+b;},0)/p.vals.length:0;
+return {name:p.name,total:avg,sc:p.sc};
+});
+}
+var asc=api===‘earnedRunAverage’||api===‘battingAverage’;
+var out=players.filter(function(p){return p.total>0;});
+if(api===‘earnedRunAverage’)out=out.filter(function(p){return p.sc>=2;});
+out.sort(function(a,b){return asc?a.total-b.total:b.total-a.total;});
+return Promise.resolve(out.slice(0,150).map(function(p,i){return{rank:i+1,name:p.name,value:p.total};}));
+}
+if(onPct)onPct(Math.round(i/seasons.length*100));
+return fetchOneSeason(api,sg,seasons[i]).then(function(rows){
+rows.forEach(function(r){
+if(!r.id||!r.name)return;
+if(!map[r.id])map[r.id]={name:r.name,total:0,sc:0,vals:[]};
+if(isRate)map[r.id].vals.push(r.val);
+else map[r.id].total+=r.val;
+map[r.id].sc++;
+});
+}).catch(function(){}).then(function(){return step(i+1);});
+}
+return step(0);
+}
+
+// ── DOM HELPERS ───────────────────────────────────────────────────────────────
+// h(tag, {attrs}, …children)
+function h(tag,attrs){
+var el=document.createElement(tag);
+if(attrs){
+Object.keys(attrs).forEach(function(k){
+if(k===‘cls’){el.className=attrs[k];}
+else if(k===‘css’){Object.assign(el.style,attrs[k]);}
+else if(k[0]===’_’){el.addEventListener(k.slice(1),attrs[k]);}
+else{el[k]=attrs[k];}
+});
+}
+for(var i=2;i<arguments.length;i++){
+var c=arguments[i];
+if(c==null||c===false)continue;
+if(typeof c===‘string’||typeof c===‘number’)el.appendChild(document.createTextNode(’’+c));
+else el.appendChild(c);
+}
+return el;
+}
+function div(attrs){var a=[].slice.call(arguments);a.unshift(‘div’);return h.apply(null,a);}
+function span(attrs){var a=[].slice.call(arguments);a.unshift(‘span’);return h.apply(null,a);}
+function btn(cls,txt,handler,extra){
+var attrs={cls:cls};
+if(extra)Object.assign(attrs,extra);
+attrs._click=handler;
+return h(‘button’,attrs,txt);
+}
+function badge(rank){
+if(rank>=1&&rank<=100)return span({cls:‘badge-hit’},’#’+rank);
+return span({cls:‘badge-miss’},rank>100?’#’+rank:‘Not Found’);
+}
+function card(extra){return div({cls:‘card’,css:extra||{}});}
+
+// ── APP STATE ─────────────────────────────────────────────────────────────────
+var S={
+screen:‘home’,
+myName:’’,roomCode:’’,isHost:false,
+leaderboard:null,
+round:1,orderIdx:0,scores:{},allGuesses:[],snakeOrder:[],
+flashResult:null,flashTimer:null,
+loadPct:0,loadMsg:’’,loadError:null,
+input:’’,suggestions:[],acIdx:-1,
+pollTimer:null,
+errorMsg:null,
 };
-});
-});
-}
 
-function aggregateSeasons(leaderCategory, statGroup, startYear, onProgress) {
-var seasons = [];
-for (var y = startYear; y <= currentYear; y++) seasons.push(y);
-var isRate = !!RATE_STATS[leaderCategory];
-var playerMap = {};
+// ── RENDER ────────────────────────────────────────────────────────────────────
+function render(){
+var app=document.getElementById(‘app’);
+while(app.firstChild)app.removeChild(app.firstChild);
 
-function processNext(i) {
-if (i >= seasons.length) {
-var players = Object.keys(playerMap).map(function(k) { return playerMap[k]; });
-if (isRate) {
-players = players.map(function(p) {
-var avg = p.vals && p.vals.length ? p.vals.reduce(function(a, b) { return a + b; }, 0) / p.vals.length : 0;
-return Object.assign({}, p, { total: avg });
-});
-}
-var ascending = leaderCategory === ‘earnedRunAverage’ || leaderCategory === ‘battingAverage’;
-var filtered = players.filter(function(p) { return p.total > 0; });
-if (leaderCategory === ‘earnedRunAverage’) filtered = filtered.filter(function(p) { return p.seasonCount >= 2; });
-filtered.sort(function(a, b) { return ascending ? a.total - b.total : b.total - a.total; });
-return Promise.resolve(
-filtered.slice(0, 150).map(function(p, idx) { return { rank: idx + 1, name: p.name, value: p.total }; })
-);
-}
-if (onProgress) onProgress(Math.round((i / seasons.length) * 100));
-return fetchSingleSeason(leaderCategory, statGroup, seasons[i]).then(function(rows) {
-rows.forEach(function(row) {
-if (!row.playerId || !row.name) return;
-if (!playerMap[row.playerId]) playerMap[row.playerId] = { name: row.name, total: 0, seasonCount: 0, vals: [] };
-if (isRate) { playerMap[row.playerId].vals.push(row.value); }
-else { playerMap[row.playerId].total += row.value; }
-playerMap[row.playerId].seasonCount++;
-});
-}).catch(function(err) {
-console.warn(‘Season ’ + seasons[i] + ’ failed:’, err.message);
-}).then(function() {
-return processNext(i + 1);
-});
-}
-return processNext(0);
-}
-
-function fetchLeaderboard(statApiKey, statGroup, timePeriodValue, onProgress) {
-var period = findPeriod(timePeriodValue);
-if (!period) return Promise.reject(new Error(‘Unknown time period’));
-if (onProgress) onProgress(0);
-return aggregateSeasons(statApiKey, statGroup, period.startYear, onProgress).then(function(rows) {
-if (onProgress) onProgress(100);
-return rows;
-});
-}
-
-// ── SNAKE ORDER ───────────────────────────────────────────────────────────────
-
-function buildSnakeOrder(numPlayers, guessesPerRound) {
-var order = [];
-for (var g = 0; g < guessesPerRound; g++) {
-if (g % 2 === 0) { for (var p = 0; p < numPlayers; p++) order.push(p); }
-else { for (var p = numPlayers - 1; p >= 0; p–) order.push(p); }
-}
-return order;
-}
-
-// ── SMALL COMPONENTS ──────────────────────────────────────────────────────────
-
-function Spinner(props) {
-var size = props.size || 20;
-return e(‘div’, { className: ‘spin’, style: { width: size, height: size, border: ‘2px solid rgba(255,255,255,0.2)’, borderTopColor: ‘#f5c842’, borderRadius: ‘50%’, display: ‘inline-block’ } });
-}
-
-function RankBadge(props) {
-var rank = props.rank;
-if (rank >= 1 && rank <= 100) return e(‘span’, { className: ‘badge-hit’ }, ‘#’ + rank);
-return e(‘span’, { className: ‘badge-miss’ }, rank > 100 ? ‘#’ + rank : ‘Not Found’);
-}
-
-function ProgressBar(props) {
-return e(‘div’, { className: ‘progress-track’ },
-e(‘div’, { className: ‘progress-fill’, style: { width: props.pct + ‘%’ } })
-);
-}
-
-// ── AUTOCOMPLETE INPUT ────────────────────────────────────────────────────────
-
-function AutocompleteInput(props) {
-var value = props.value, onChange = props.onChange, leaderboard = props.leaderboard;
-var onSubmit = props.onSubmit, disabled = props.disabled;
-var s1 = useState(false); var open = s1[0]; var setOpen = s1[1];
-var s2 = useState(-1); var selIdx = s2[0]; var setSelIdx = s2[1];
-var inputRef = useRef(null);
-
-var suggestions = useMemo(function() {
-if (!value || value.length < 2 || !leaderboard) return [];
-var norm = normalizeName(value);
-return leaderboard.filter(function(p) { return normalizeName(p.name).indexOf(norm) !== -1; }).slice(0, 8);
-}, [value, leaderboard]);
-
-useEffect(function() { setOpen(suggestions.length > 0); setSelIdx(-1); }, [suggestions.length]);
-
-function choose(name) { onChange(name); setOpen(false); if (inputRef.current) inputRef.current.focus(); }
-
-function handleKey(ev) {
-if (!open) { if (ev.key === ‘Enter’ && value.trim()) { ev.preventDefault(); onSubmit(value.trim()); } return; }
-if (ev.key === ‘ArrowDown’) { ev.preventDefault(); setSelIdx(function(i) { return Math.min(i + 1, suggestions.length - 1); }); }
-else if (ev.key === ‘ArrowUp’) { ev.preventDefault(); setSelIdx(function(i) { return Math.max(i - 1, -1); }); }
-else if (ev.key === ‘Enter’) { ev.preventDefault(); if (selIdx >= 0 && suggestions[selIdx]) choose(suggestions[selIdx].name); else if (value.trim()) onSubmit(value.trim()); }
-else if (ev.key === ‘Escape’) setOpen(false);
-}
-
-return e(‘div’, { style: { position: ‘relative’, flex: 1 } },
-e(‘input’, { ref: inputRef, type: ‘text’, value: value,
-onChange: function(ev) { onChange(ev.target.value); },
-onKeyDown: handleKey,
-onBlur: function() { setTimeout(function() { setOpen(false); }, 150); },
-onFocus: function() { if (suggestions.length > 0) setOpen(true); },
-placeholder: ‘Type a player name…’, disabled: disabled, autoComplete: ‘off’
-}),
-open && e(‘div’, { className: ‘autocomplete-list slide-down’ },
-suggestions.map(function(p, i) {
-return e(‘div’, { key: p.name, className: ‘autocomplete-item’ + (i === selIdx ? ’ selected’ : ‘’),
-onMouseDown: function() { choose(p.name); }
-}, e(‘span’, { style: { marginRight: 8 } }, e(RankBadge, { rank: p.rank })), p.name);
-})
+if(S.errorMsg){
+app.appendChild(
+div({cls:’’,css:{position:‘fixed’,top:0,left:0,right:0,background:‘rgba(200,80,80,0.95)’,color:’#fff’,padding:‘12px 20px’,zIndex:‘999’,display:‘flex’,justifyContent:‘space-between’,alignItems:‘center’,fontSize:‘14px’}},
+span(null,‘⚠️ ‘+S.errorMsg),
+btn(’’,  ‘✕’,function(){S.errorMsg=null;render();},{css:{background:‘transparent’,color:’#fff’,border:‘none’,fontSize:‘20px’}})
 )
 );
+}
+
+var screens={home:screenHome,lobby:screenLobby,loading:screenLoading,game:screenGame,end:screenEnd};
+if(screens[S.screen])app.appendChild(screens[S.screen]());
+
+app.appendChild(div({css:{position:‘fixed’,bottom:‘12px’,right:‘16px’,fontSize:‘11px’,color:‘rgba(245,240,224,0.18)’,pointerEvents:‘none’}},‘The 100 Game ⚾’));
 }
 
 // ── HOME SCREEN ───────────────────────────────────────────────────────────────
+function screenHome(){
+var activeTab=‘create’;
+var wrap=div({cls:‘center-wrap’});
+var inner=div({css:{maxWidth:‘460px’,width:‘100%’}});
 
-function HomeScreen(props) {
-var s1 = useState(’’); var name = s1[0]; var setName = s1[1];
-var s2 = useState(’’); var joinCode = s2[0]; var setJoinCode = s2[1];
-var s3 = useState(‘create’); var tab = s3[0]; var setTab = s3[1];
+inner.appendChild(div({cls:‘fadein’,css:{textAlign:‘center’,marginBottom:‘36px’}},
+div({css:{fontSize:‘62px’,marginBottom:‘8px’}},‘⚾’),
+h(‘h1’,{css:{fontSize:‘42px’,fontWeight:‘bold’,color:’#f5c842’,letterSpacing:’-0.5px’,lineHeight:‘1’}},‘The 100 Game’),
+h(‘p’,{css:{color:‘rgba(245,240,224,0.5)’,marginTop:‘10px’,fontSize:‘16px’}},“Baseball’s closest-to-100 trivia challenge”)
+));
 
-return e(‘div’, { style: { minHeight: ‘100vh’, display: ‘flex’, alignItems: ‘center’, justifyContent: ‘center’, padding: 20 } },
-e(‘div’, { style: { maxWidth: 460, width: ‘100%’ } },
-e(‘div’, { className: ‘fade-in’, style: { textAlign: ‘center’, marginBottom: 40 } },
-e(‘div’, { style: { fontSize: 64, marginBottom: 8 } }, ‘⚾’),
-e(‘h1’, { style: { fontSize: 44, fontWeight: ‘bold’, color: ‘#f5c842’, letterSpacing: ‘-0.5px’, lineHeight: 1 } }, ‘The 100 Game’),
-e(‘p’, { style: { color: ‘rgba(245,240,224,0.55)’, marginTop: 10, fontSize: 16 } }, “Baseball’s closest-to-100 trivia challenge”)
-),
-e(‘div’, { className: ‘card fade-in’, style: { animationDelay: ‘0.1s’ } },
-e(‘div’, { style: { display: ‘flex’, gap: 8, marginBottom: 24, background: ‘rgba(0,0,0,0.2)’, borderRadius: 10, padding: 4 } },
-e(‘button’, { onClick: function() { setTab(‘create’); }, style: { flex: 1, padding: ‘10px’, borderRadius: 8, fontFamily: ‘Georgia,serif’, fontSize: 15, fontWeight: ‘bold’, background: tab === ‘create’ ? ‘rgba(245,200,66,0.2)’ : ‘transparent’, border: tab === ‘create’ ? ‘1px solid rgba(245,200,66,0.5)’ : ‘1px solid transparent’, color: tab === ‘create’ ? ‘#f5c842’ : ‘rgba(245,240,224,0.5)’, cursor: ‘pointer’, transition: ‘all 0.2s’ } }, ‘🏟 Create Room’),
-e(‘button’, { onClick: function() { setTab(‘join’); }, style: { flex: 1, padding: ‘10px’, borderRadius: 8, fontFamily: ‘Georgia,serif’, fontSize: 15, fontWeight: ‘bold’, background: tab === ‘join’ ? ‘rgba(245,200,66,0.2)’ : ‘transparent’, border: tab === ‘join’ ? ‘1px solid rgba(245,200,66,0.5)’ : ‘1px solid transparent’, color: tab === ‘join’ ? ‘#f5c842’ : ‘rgba(245,240,224,0.5)’, cursor: ‘pointer’, transition: ‘all 0.2s’ } }, ‘🔗 Join Room’)
-),
-e(‘div’, { style: { marginBottom: 16 } },
-e(‘label’, null, ‘Your Name’),
-e(‘input’, { type: ‘text’, value: name, onChange: function(ev) { setName(ev.target.value.slice(0, 20)); }, placeholder: ‘Enter your name…’, maxLength: 20 })
-),
-tab === ‘join’ && e(‘div’, { style: { marginBottom: 16 } },
-e(‘label’, null, ‘Room Code’),
-e(‘input’, { type: ‘text’, value: joinCode, onChange: function(ev) { setJoinCode(ev.target.value.toUpperCase().slice(0, 4)); }, placeholder: ‘e.g. AB3D’, maxLength: 4, style: { letterSpacing: 6, fontFamily: ‘monospace’, fontSize: 20, fontWeight: ‘bold’, textAlign: ‘center’ } })
-),
-e(‘button’, { className: ‘btn-gold’, style: { width: ‘100%’, padding: ‘12px’, fontSize: 17 },
-disabled: !name.trim() || (tab === ‘join’ && joinCode.length < 4),
-onClick: function() { tab === ‘create’ ? props.onCreateRoom(name.trim()) : props.onJoinRoom(name.trim(), joinCode); }
-}, tab === ‘create’ ? ‘🏟 Create Room’ : ‘→ Join Room’)
-),
-e(‘div’, { className: ‘card fade-in’, style: { animationDelay: ‘0.2s’, marginTop: 20 } },
-e(‘h3’, { style: { color: ‘#f5c842’, marginBottom: 12, fontSize: 15 } }, ‘📋 How to Play’),
-e(‘p’, { className: ‘small’, style: { color: ‘rgba(245,240,224,0.7)’, lineHeight: 1.7 } },
-’The host picks a stat and time period. Players take turns guessing players from that leaderboard. Your score equals your guess's rank (1–100). ‘,
-e(‘strong’, { style: { color: ‘#f5c842’ } }, ‘#100 scores 100 pts’),
-’ — ranked 101+ scores 0. Closest to #100 wins. Most points after all rounds wins!’
-)
-)
-)
-);
+var c=card({animationDelay:‘0.08s’});c.classList.add(‘fadein’);
+
+// Tab buttons
+var tabRow=div({cls:‘tab-row’});
+var tCreate=h(‘button’,{cls:‘tab-btn active’,_click:function(){
+activeTab=‘create’;tCreate.className=‘tab-btn active’;tJoin.className=‘tab-btn’;
+joinBlock.style.display=‘none’;goBtn.textContent=‘🏟 Create Room’;
+}},‘🏟 Create Room’);
+var tJoin=h(‘button’,{cls:‘tab-btn’,_click:function(){
+activeTab=‘join’;tJoin.className=‘tab-btn active’;tCreate.className=‘tab-btn’;
+joinBlock.style.display=‘block’;goBtn.textContent=‘→ Join Room’;
+}},‘🔗 Join Room’);
+tabRow.appendChild(tCreate);tabRow.appendChild(tJoin);
+c.appendChild(tabRow);
+
+c.appendChild(h(‘label’,null,‘Your Name’));
+var nameIn=h(‘input’,{type:‘text’,placeholder:‘Enter your name…’,maxLength:20,css:{marginBottom:‘16px’}});
+c.appendChild(nameIn);
+
+var joinBlock=div({css:{display:‘none’,marginBottom:‘16px’}});
+joinBlock.appendChild(h(‘label’,null,‘Room Code’));
+var codeIn=h(‘input’,{type:‘text’,placeholder:‘e.g. AB3D’,maxLength:4,css:{letterSpacing:‘8px’,fontFamily:‘monospace’,fontSize:‘22px’,fontWeight:‘bold’,textAlign:‘center’,textTransform:‘uppercase’}});
+codeIn.addEventListener(‘input’,function(){codeIn.value=codeIn.value.toUpperCase().replace(/[^A-Z0-9]/g,’’).slice(0,4);});
+joinBlock.appendChild(codeIn);
+c.appendChild(joinBlock);
+
+var goBtn=btn(‘btn-gold’,‘🏟 Create Room’,function(){
+var name=(nameIn.value||’’).trim();
+if(!name){nameIn.focus();return;}
+if(activeTab===‘create’){doCreate(name);}
+else{
+var code=codeIn.value.trim().toUpperCase();
+if(code.length<4){codeIn.focus();return;}
+doJoin(name,code);
+}
+},{css:{width:‘100%’,padding:‘13px’,fontSize:‘17px’}});
+c.appendChild(goBtn);
+inner.appendChild(c);
+
+var howCard=card({marginTop:‘18px’,animationDelay:‘0.16s’});howCard.classList.add(‘fadein’);
+howCard.appendChild(h(‘h3’,{css:{color:’#f5c842’,marginBottom:‘10px’,fontSize:‘15px’}},‘📋 How to Play’));
+var p=h(‘p’,{css:{color:‘rgba(245,240,224,0.7)’,lineHeight:‘1.75’,fontSize:‘14px’}});
+p.innerHTML=‘The host picks a stat + time period. Players take turns guessing players from that leaderboard. Score = rank (1–100). <strong style="color:#f5c842">#100 = 100 pts</strong>, ranked 101+ = 0 pts. Most points wins!’;
+howCard.appendChild(p);inner.appendChild(howCard);
+
+wrap.appendChild(inner);
+return wrap;
 }
 
-// ── LOBBY SCREEN ──────────────────────────────────────────────────────────────
-
-function LobbyScreen(props) {
-var roomCode = props.roomCode, myName = props.myName, isHost = props.isHost;
-var s1 = useState(getRoom(roomCode)); var room = s1[0]; var setRoomState = s1[1];
-var s2 = useState(false); var copied = s2[0]; var setCopied = s2[1];
-var s3 = useState(false); var starting = s3[0]; var setStarting = s3[1];
-var s4 = useState(0); var loadPct = s4[0]; var setLoadPct = s4[1];
-var s5 = useState(’’); var loadMsg = s5[0]; var setLoadMsg = s5[1];
-var s6 = useState(null); var error = s6[0]; var setError = s6[1];
-
-useEffect(function() {
-var iv = setInterval(function() { setRoomState(getRoom(roomCode)); }, 1000);
-return function() { clearInterval(iv); };
-}, [roomCode]);
-
-function doUpdate(key, val) {
-updateRoomSetting(roomCode, key, val);
-setRoomState(getRoom(roomCode));
+function doCreate(name){
+var code=rand4();
+setRoom(code,{code:code,host:name,players:[{name:name}],settings:{statKey:‘homeRuns’,timePeriod:‘last5’,rounds:3,gpr:2},state:‘lobby’});
+S.myName=name;S.roomCode=code;S.isHost=true;S.screen=‘lobby’;
+startPoll();render();
+}
+function doJoin(name,code){
+var room=getRoom(code);
+if(!room){S.errorMsg=‘Room “’+code+’” not found.’;render();return;}
+if(room.state!==‘lobby’){S.errorMsg=‘That game is already in progress.’;render();return;}
+var players=room.players||[];
+if(!players.find(function(p){return p.name===name;})){
+setRoom(code,Object.assign({},room,{players:players.concat([{name:name}])}));
+}
+S.myName=name;S.roomCode=code;S.isHost=false;S.screen=‘lobby’;
+startPoll();render();
 }
 
-function copyCode() {
-try { navigator.clipboard.writeText(roomCode); } catch(err) {}
-setCopied(true);
-setTimeout(function() { setCopied(false); }, 1800);
+// ── POLL ──────────────────────────────────────────────────────────────────────
+function startPoll(){
+stopPoll();
+S.pollTimer=setInterval(function(){
+var room=getRoom(S.roomCode);
+if(!room)return;
+if(!S.isHost&&room.state===‘game’&&room.leaderboard){
+stopPoll();S.leaderboard=room.leaderboard;startGame(room);return;
+}
+if(S.screen===‘lobby’)render();
+},1200);
+}
+function stopPoll(){if(S.pollTimer){clearInterval(S.pollTimer);S.pollTimer=null;}}
+
+// ── LOBBY ─────────────────────────────────────────────────────────────────────
+function screenLobby(){
+var room=getRoom(S.roomCode)||{players:[],settings:{},host:’’};
+var st=room.settings||{};
+var statKey=st.statKey||‘homeRuns’;
+var timePeriod=st.timePeriod||‘last5’;
+var rounds=st.rounds||3;
+var gpr=st.gpr||2;
+var players=room.players||[];
+
+var wrap=div({cls:‘center-wrap’});
+var inner=div({css:{maxWidth:‘510px’,width:‘100%’}});
+inner.appendChild(div({cls:‘fadein’,css:{textAlign:‘center’,marginBottom:‘24px’}},
+h(‘h2’,{css:{fontSize:‘26px’,color:’#f5c842’}},‘🏟 Game Lobby’)
+));
+
+// Code card
+var cc=card({marginBottom:‘14px’});cc.classList.add(‘fadein’);
+cc.style.textAlign=‘center’;
+cc.appendChild(div({cls:‘muted’,css:{marginBottom:‘8px’}},‘Share this code with friends’));
+cc.appendChild(div({cls:‘room-code’},S.roomCode));
+var copyBtn=btn(‘btn-outline’,‘📋 Copy Code’,function(){
+try{navigator.clipboard.writeText(S.roomCode);}catch(e){}
+copyBtn.textContent=‘✅ Copied!’;setTimeout(function(){copyBtn.textContent=‘📋 Copy Code’;},1800);
+},{css:{marginTop:‘12px’,fontSize:‘13px’}});
+cc.appendChild(copyBtn);inner.appendChild(cc);
+
+// Players card
+var pc=card({marginBottom:‘14px’});pc.classList.add(‘fadein’);
+pc.appendChild(h(‘h3’,{css:{fontSize:‘15px’,color:’#f5c842’,marginBottom:‘12px’}},‘👥 Players (’+players.length+’)’));
+players.forEach(function(p,i){
+var row=div({css:{display:‘flex’,alignItems:‘center’,gap:‘10px’,padding:‘8px 0’,borderBottom:i<players.length-1?‘1px solid rgba(255,255,255,0.07)’:‘none’}});
+row.appendChild(span({cls:‘dot’}));
+row.appendChild(span({css:{flex:‘1’}},p.name));
+if(p.name===room.host)row.appendChild(span({cls:‘muted’},‘Host’));
+pc.appendChild(row);
+});
+if(players.length===1)pc.appendChild(div({cls:‘muted’,css:{marginTop:‘8px’}},‘Waiting for others… (solo play works too!)’));
+inner.appendChild(pc);
+
+// Settings card
+var sc=card({marginBottom:‘14px’});sc.classList.add(‘fadein’);
+sc.appendChild(h(‘h3’,{css:{fontSize:‘15px’,color:’#f5c842’,marginBottom:‘14px’}},‘⚙️ Game Settings’));
+
+if(S.isHost){
+sc.appendChild(h(‘label’,null,‘Stat Category’));
+var statSel=h(‘select’,{css:{marginBottom:‘14px’}});
+var curGrp=’’;
+STATS.forEach(function(s){
+if(s.group!==curGrp){curGrp=s.group;var og=document.createElement(‘optgroup’);og.label=curGrp;statSel.appendChild(og);}
+var op=document.createElement(‘option’);op.value=s.api;op.textContent=s.label;if(s.api===statKey)op.selected=true;
+statSel.lastChild.appendChild(op);
+});
+statSel.addEventListener(‘change’,function(){patchSetting(S.roomCode,‘statKey’,statSel.value);render();});
+sc.appendChild(statSel);
+
+```
+sc.appendChild(h('label',null,'Time Period'));
+var perSel=h('select',{css:{marginBottom:'14px'}});
+PERIODS.forEach(function(p){var op=document.createElement('option');op.value=p.value;op.textContent=p.label;if(p.value===timePeriod)op.selected=true;perSel.appendChild(op);});
+perSel.addEventListener('change',function(){patchSetting(S.roomCode,'timePeriod',perSel.value);render();});
+sc.appendChild(perSel);
+
+var grid=div({css:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'12px'}});
+var ld=div(null);ld.appendChild(h('label',null,'Rounds'));
+var rSel=h('select');for(var n=1;n<=10;n++){var op=document.createElement('option');op.value=n;op.textContent=n;if(n===rounds)op.selected=true;rSel.appendChild(op);}
+rSel.addEventListener('change',function(){patchSetting(S.roomCode,'rounds',parseInt(rSel.value));render();});
+ld.appendChild(rSel);grid.appendChild(ld);
+
+var gd=div(null);gd.appendChild(h('label',null,'Guesses / Round'));
+var gSel=h('select');[1,2,3,4,5].forEach(function(n){var op=document.createElement('option');op.value=n;op.textContent=n;if(n===gpr)op.selected=true;gSel.appendChild(op);});
+gSel.addEventListener('change',function(){patchSetting(S.roomCode,'gpr',parseInt(gSel.value));render();});
+gd.appendChild(gSel);grid.appendChild(gd);
+sc.appendChild(grid);
+```
+
+} else {
+var statLabel=(getStat(statKey)||{}).label||statKey;
+var perLabel=(getPeriod(timePeriod)||{}).label||timePeriod;
+var grid=div({css:{display:‘grid’,gridTemplateColumns:‘1fr 1fr’,gap:‘8px’,marginBottom:‘10px’}});
+[[‘Stat’,statLabel],[‘Period’,perLabel],[‘Rounds’,rounds],[‘Guesses/Round’,gpr]].forEach(function(pair){
+var cell=div({css:{background:‘rgba(0,0,0,0.15)’,borderRadius:‘8px’,padding:‘8px 12px’}});
+cell.appendChild(div({cls:‘muted’},pair[0]));
+cell.appendChild(div({css:{color:’#f5c842’,fontWeight:‘bold’,fontSize:‘15px’}},’’+pair[1]));
+grid.appendChild(cell);
+});
+sc.appendChild(grid);
+sc.appendChild(div({cls:‘muted’},‘Waiting for the host to start…’));
+}
+inner.appendChild(sc);
+
+var btnRow=div({css:{display:‘flex’,gap:‘10px’}});
+btnRow.appendChild(btn(‘btn-outline’,‘← Leave’,function(){
+stopPoll();
+var r=getRoom(S.roomCode);
+if(r)setRoom(S.roomCode,Object.assign({},r,{players:(r.players||[]).filter(function(p){return p.name!==S.myName;})}));
+S.screen=‘home’;render();
+}));
+if(S.isHost){
+btnRow.appendChild(btn(‘btn-gold’,‘▶ Start Game’,function(){
+stopPoll();launchGame();
+},{css:{flex:‘1’,padding:‘12px’,fontSize:‘16px’}}));
+}
+inner.appendChild(btnRow);
+wrap.appendChild(inner);
+return wrap;
 }
 
-function startGame() {
-setError(null); setStarting(true);
-var r = getRoom(roomCode);
-var s = (r && r.settings) ? r.settings : {};
-var statKey = s.statKey || ‘homeRuns’;
-var timePeriod = s.timePeriod || ‘last5’;
-var stat = findStat(statKey);
-if (!stat) { setError(‘Invalid stat.’); setStarting(false); return; }
-setLoadMsg(‘Fetching leaderboard…’);
-fetchLeaderboard(stat.api, stat.statGroup, timePeriod, function(pct) {
-setLoadPct(pct);
-setLoadMsg(’Loading seasons… ’ + pct + ‘%’);
-}).then(function(lb) {
-setLoadMsg(‘Done!’);
-props.onStartGame(lb);
-}).catch(function(err) {
-setError(’Failed to load: ’ + err.message);
-setStarting(false);
+// ── LOADING ───────────────────────────────────────────────────────────────────
+function launchGame(){
+var room=getRoom(S.roomCode);
+var st=(room&&room.settings)||{};
+var stat=getStat(st.statKey||‘homeRuns’);
+var period=getPeriod(st.timePeriod||‘last5’);
+if(!stat||!period){S.errorMsg=‘Invalid settings.’;render();return;}
+S.screen=‘loading’;S.loadPct=0;S.loadMsg=‘Fetching leaderboard…’;S.loadError=null;render();
+buildLB(stat.api,stat.sg,period.start,function(pct){
+S.loadPct=pct;S.loadMsg=‘Loading seasons… ‘+pct+’%’;
+var f=document.getElementById(‘lpfill’);if(f)f.style.width=pct+’%’;
+var m=document.getElementById(‘lpmsg’);if(m)m.textContent=S.loadMsg;
+}).then(function(lb){
+S.leaderboard=lb;
+var room=getRoom(S.roomCode);
+setRoom(S.roomCode,Object.assign({},room,{state:‘game’,leaderboard:lb}));
+startGame(room);
+}).catch(function(err){
+S.loadError=’Could not load data: ’+err.message;S.screen=‘loading’;render();
 });
 }
 
-if (!room) return e(‘div’, { style: { padding: 40, textAlign: ‘center’ } }, e(Spinner, { size: 32 }));
-
-var settings = room.settings || {};
-var players = room.players || [];
-var statKey = settings.statKey || ‘homeRuns’;
-var timePeriod = settings.timePeriod || ‘last5’;
-var rounds = settings.rounds || 3;
-var gpr = settings.guessesPerRound || 2;
-var statLabel = (findStat(statKey) || {}).label || statKey;
-var periodLabel = (findPeriod(timePeriod) || {}).label || timePeriod;
-
-return e(‘div’, { style: { minHeight: ‘100vh’, display: ‘flex’, alignItems: ‘center’, justifyContent: ‘center’, padding: 20 } },
-e(‘div’, { style: { maxWidth: 520, width: ‘100%’ } },
-e(‘div’, { className: ‘fade-in’, style: { textAlign: ‘center’, marginBottom: 28 } },
-e(‘h2’, { style: { fontSize: 26, color: ‘#f5c842’ } }, ‘🏟 Game Lobby’)
-),
-
-```
-  e('div', { className: 'card fade-in', style: { textAlign: 'center', marginBottom: 16 } },
-    e('p', { className: 'small muted', style: { marginBottom: 8 } }, 'Share this code with friends'),
-    e('div', { className: 'room-code' }, roomCode),
-    e('button', { className: 'btn-outline', style: { marginTop: 12, fontSize: 13 }, onClick: copyCode },
-      copied ? '✅ Copied!' : '📋 Copy Code'
-    )
-  ),
-
-  e('div', { className: 'card fade-in', style: { marginBottom: 16 } },
-    e('h3', { style: { fontSize: 15, color: '#f5c842', marginBottom: 12 } }, '👥 Players (' + players.length + ')'),
-    players.map(function(p, i) {
-      return e('div', { key: p.name, style: { display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderBottom: i < players.length - 1 ? '1px solid rgba(255,255,255,0.07)' : 'none' } },
-        e('div', { className: 'pulse-anim', style: { width: 8, height: 8, borderRadius: '50%', background: '#50c864' } }),
-        e('span', { style: { flex: 1 } }, p.name),
-        p.name === room.host && e('span', { className: 'small muted' }, 'Host')
-      );
-    }),
-    players.length === 1 && e('p', { className: 'small muted', style: { marginTop: 8 } }, 'Waiting for others… (solo play works too!)')
-  ),
-
-  isHost
-    ? e('div', { className: 'card fade-in', style: { marginBottom: 16 } },
-        e('h3', { style: { fontSize: 15, color: '#f5c842', marginBottom: 16 } }, '⚙️ Game Settings'),
-        e('div', { style: { marginBottom: 14 } },
-          e('label', null, 'Stat Category'),
-          e('select', { value: statKey, onChange: function(ev) { doUpdate('statKey', ev.target.value); } },
-            STAT_CATEGORIES.map(function(group) {
-              return e('optgroup', { key: group.group, label: group.group },
-                group.stats.map(function(s) { return e('option', { key: s.api, value: s.api }, s.label); })
-              );
-            })
-          )
-        ),
-        e('div', { style: { marginBottom: 14 } },
-          e('label', null, 'Time Period'),
-          e('select', { value: timePeriod, onChange: function(ev) { doUpdate('timePeriod', ev.target.value); } },
-            TIME_PERIODS.map(function(p) { return e('option', { key: p.value, value: p.value }, p.label); })
-          )
-        ),
-        e('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 } },
-          e('div', null,
-            e('label', null, 'Rounds'),
-            e('select', { value: rounds, onChange: function(ev) { doUpdate('rounds', parseInt(ev.target.value)); } },
-              [1,2,3,4,5,6,7,8,9,10].map(function(n) { return e('option', { key: n, value: n }, n); })
-            )
-          ),
-          e('div', null,
-            e('label', null, 'Guesses / Round'),
-            e('select', { value: gpr, onChange: function(ev) { doUpdate('guessesPerRound', parseInt(ev.target.value)); } },
-              [1,2,3,4,5].map(function(n) { return e('option', { key: n, value: n }, n); })
-            )
-          )
-        )
-      )
-    : e('div', { className: 'card fade-in', style: { marginBottom: 16 } },
-        e('h3', { style: { fontSize: 15, color: '#f5c842', marginBottom: 12 } }, '⚙️ Game Settings'),
-        e('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 12 } },
-          [['Stat', statLabel], ['Period', periodLabel], ['Rounds', rounds], ['Guesses/Round', gpr]].map(function(pair) {
-            return e('div', { key: pair[0], style: { background: 'rgba(0,0,0,0.15)', borderRadius: 8, padding: '8px 12px' } },
-              e('div', { className: 'small muted' }, pair[0]),
-              e('div', { style: { color: '#f5c842', fontWeight: 'bold', fontSize: 15 } }, pair[1])
-            );
-          })
-        ),
-        e('p', { className: 'small muted' }, 'Waiting for the host to start…')
-      ),
-
-  error && e('div', { style: { background: 'rgba(200,80,80,0.15)', border: '1px solid rgba(200,80,80,0.4)', borderRadius: 8, padding: 12, marginBottom: 12, color: '#ff9999', fontSize: 14 } }, error),
-
-  starting && e('div', { className: 'card', style: { marginBottom: 16 } },
-    e('div', { style: { display: 'flex', alignItems: 'center', gap: 12, marginBottom: 10 } }, e(Spinner, { size: 18 }), e('span', { className: 'small' }, loadMsg)),
-    e(ProgressBar, { pct: loadPct })
-  ),
-
-  e('div', { style: { display: 'flex', gap: 10 } },
-    e('button', { className: 'btn-outline', style: { flexShrink: 0 }, onClick: props.onLeave, disabled: starting }, '← Leave'),
-    isHost && e('button', { className: 'btn-gold', style: { flex: 1, padding: 12, fontSize: 16 }, onClick: startGame, disabled: starting || players.length === 0 },
-      starting
-        ? e('span', { style: { display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'center' } }, e(Spinner, { size: 16 }), ' Loading…')
-        : '▶ Start Game'
-    )
-  )
-)
-```
-
-);
-}
-
-// ── GAME SCREEN ───────────────────────────────────────────────────────────────
-
-function GameScreen(props) {
-var roomCode = props.roomCode, myName = props.myName, leaderboard = props.leaderboard;
-var settings = props.settings, players = props.players, onEndGame = props.onEndGame;
-
-var stat = findStat(settings.statKey);
-var period = findPeriod(settings.timePeriod);
-var rounds = settings.rounds || 3;
-var gpr = settings.guessesPerRound || 2;
-
-var s1 = useState(1); var round = s1[0]; var setRound = s1[1];
-var s2 = useState(function() { var sc = {}; players.forEach(function(p) { sc[p.name] = 0; }); return sc; });
-var scores = s2[0]; var setScores = s2[1];
-var s3 = useState([]); var allGuesses = s3[0]; var setAllGuesses = s3[1];
-var s4 = useState(’’); var input = s4[0]; var setInput = s4[1];
-var s5 = useState(null); var flashResult = s5[0]; var setFlashResult = s5[1];
-var s6 = useState(0); var orderIdx = s6[0]; var setOrderIdx = s6[1];
-var flashTimerRef = useRef(null);
-
-// Refs for use inside submit without stale closures
-var scoresRef = useRef(scores);
-var allGuessesRef = useRef(allGuesses);
-var roundRef = useRef(round);
-var orderIdxRef = useRef(orderIdx);
-useEffect(function() { scoresRef.current = scores; }, [scores]);
-useEffect(function() { allGuessesRef.current = allGuesses; }, [allGuesses]);
-useEffect(function() { roundRef.current = round; }, [round]);
-useEffect(function() { orderIdxRef.current = orderIdx; }, [orderIdx]);
-
-var snakeOrder = useMemo(function() { return buildSnakeOrder(players.length, gpr); }, [players.length, gpr]);
-var totalTurns = snakeOrder.length;
-var currentPlayerIdx = snakeOrder[orderIdx];
-var currentPlayer = players[currentPlayerIdx];
-var isMyTurn = currentPlayer && currentPlayer.name === myName;
-
-function lookupPlayer(inputName) {
-var norm = normalizeName(inputName);
-for (var i = 0; i < leaderboard.length; i++) { if (normalizeName(leaderboard[i].name) === norm) return leaderboard[i]; }
-for (var i = 0; i < leaderboard.length; i++) { if (normalizeName(leaderboard[i].name).indexOf(norm) !== -1) return leaderboard[i]; }
-return null;
-}
-
-function handleSubmit(nameInput) {
-if (!isMyTurn) return;
-var trimmed = nameInput.trim();
-if (!trimmed) return;
-
-```
-var found = lookupPlayer(trimmed);
-var rank = found ? found.rank : 999;
-var value = found ? found.value : 0;
-var pts = (rank >= 1 && rank <= 100) ? rank : 0;
-var result = { playerName: found ? found.name : trimmed, guesserName: myName, rank: rank, value: value, pts: pts, round: roundRef.current, found: !!found };
-
-var newScores = Object.assign({}, scoresRef.current);
-newScores[myName] = (newScores[myName] || 0) + pts;
-var newGuesses = allGuessesRef.current.concat([result]);
-
-setScores(newScores);
-setAllGuesses(newGuesses);
-setInput('');
-
-if (flashTimerRef.current) clearTimeout(flashTimerRef.current);
-setFlashResult(result);
-flashTimerRef.current = setTimeout(function() { setFlashResult(null); }, 3000);
-
-var nextIdx = orderIdxRef.current + 1;
-if (nextIdx >= totalTurns) {
-  if (roundRef.current >= rounds) {
-    setTimeout(function() { onEndGame(newScores, newGuesses); }, 300);
-  } else {
-    setRound(function(r) { return r + 1; });
-    setOrderIdx(0);
-  }
+function screenLoading(){
+var wrap=div({cls:‘center-wrap’});
+var inner=div({css:{maxWidth:‘380px’,width:‘100%’,textAlign:‘center’}});
+inner.appendChild(div({css:{fontSize:‘48px’,marginBottom:‘16px’}},‘⚾’));
+inner.appendChild(h(‘h2’,{css:{color:’#f5c842’,marginBottom:‘8px’,fontSize:‘22px’}},‘Loading Leaderboard’));
+if(S.loadError){
+inner.appendChild(div({css:{background:‘rgba(200,80,80,0.15)’,border:‘1px solid rgba(200,80,80,0.4)’,borderRadius:‘8px’,padding:‘14px’,marginTop:‘16px’,color:’#ff9999’,fontSize:‘14px’,lineHeight:‘1.6’}},S.loadError));
+inner.appendChild(btn(‘btn-gold’,‘← Back to Lobby’,function(){S.screen=‘lobby’;startPoll();render();},{css:{marginTop:‘16px’,padding:‘12px 28px’}}));
 } else {
-  setOrderIdx(nextIdx);
+inner.appendChild(h(‘p’,{id:‘lpmsg’,cls:‘muted’,css:{marginBottom:‘16px’,fontSize:‘14px’}},S.loadMsg));
+var track=div({cls:‘progress-track’,css:{height:‘8px’}});
+track.appendChild(div({id:‘lpfill’,cls:‘progress-fill’,css:{width:S.loadPct+’%’}}));
+inner.appendChild(track);
+inner.appendChild(div({css:{marginTop:‘24px’,display:‘flex’,justifyContent:‘center’}},h(‘div’,{cls:‘spinner’})));
+inner.appendChild(div({cls:‘muted’,css:{marginTop:‘14px’,fontSize:‘13px’}},‘May take a minute for longer time ranges…’));
 }
+wrap.appendChild(inner);return wrap;
+}
+
+// ── GAME ──────────────────────────────────────────────────────────────────────
+function startGame(room){
+var st=(room&&room.settings)||{};
+var players=(room&&room.players)||[];
+S.round=1;S.orderIdx=0;S.allGuesses=[];
+S.scores={};players.forEach(function(p){S.scores[p.name]=0;});
+S.snakeOrder=buildSnake(players.length,st.gpr||2);
+S.flashResult=null;S.input=’’;S.suggestions=[];S.acIdx=-1;
+S.screen=‘game’;render();
+}
+
+function screenGame(){
+var room=getRoom(S.roomCode)||{players:[],settings:{}};
+var st=room.settings||{};
+var players=room.players||[];
+var stat=getStat(st.statKey);
+var period=getPeriod(st.timePeriod);
+var rounds=st.rounds||3;
+var totalTurns=S.snakeOrder.length;
+var curIdx=S.snakeOrder[S.orderIdx];
+var curPlayer=players[curIdx];
+var myTurn=curPlayer&&curPlayer.name===S.myName;
+var sorted=players.slice().sort(function(a,b){return(S.scores[b.name]||0)-(S.scores[a.name]||0);});
+var recent=S.allGuesses.slice().reverse().slice(0,8);
+
+var wrap=div({css:{minHeight:‘100vh’,padding:‘14px 12px’}});
+
+// Top bar
+var tb=div({css:{maxWidth:‘700px’,margin:‘0 auto 14px auto’,display:‘flex’,alignItems:‘center’,gap:‘10px’,flexWrap:‘wrap’}});
+tb.appendChild(span({css:{fontFamily:‘monospace’,color:’#f5c842’,fontWeight:‘bold’,fontSize:‘13px’,background:‘rgba(245,200,66,0.1)’,border:‘1px solid rgba(245,200,66,0.3)’,borderRadius:‘6px’,padding:‘3px 10px’}},S.roomCode));
+tb.appendChild(span({cls:‘muted’},‘Round ‘+S.round+’/’+rounds));
+tb.appendChild(span({css:{marginLeft:‘auto’,background:‘rgba(255,255,255,0.06)’,borderRadius:‘6px’,padding:‘3px 10px’,fontSize:‘13px’}},(stat?stat.label:’’)+’ · ‘+(period?period.label:’’)));
+wrap.appendChild(tb);
+
+var layout=div({css:{maxWidth:‘700px’,margin:‘0 auto’,display:‘grid’,gridTemplateColumns:players.length>1?‘185px 1fr’:‘1fr’,gap:‘12px’,alignItems:‘start’}});
+
+// Scoreboard
+if(players.length>1){
+var sb=card({position:‘sticky’,top:‘12px’});
+sb.appendChild(h(‘h3’,{css:{fontSize:‘14px’,color:’#f5c842’,marginBottom:‘12px’}},‘📊 Scores’));
+sorted.forEach(function(p){
+var row=div({css:{display:‘flex’,alignItems:‘center’,gap:‘8px’,padding:‘7px 0’,borderBottom:‘1px solid rgba(255,255,255,0.06)’}});
+if(curPlayer&&p.name===curPlayer.name)row.appendChild(span({css:{fontSize:‘11px’}},‘⬅’));
+row.appendChild(span({css:{flex:‘1’,fontSize:‘14px’,fontWeight:p.name===S.myName?‘bold’:‘normal’,color:p.name===S.myName?’#f5c842’:’#f5f0e0’}},p.name));
+row.appendChild(span({css:{fontWeight:‘bold’,color:’#f5c842’}},’’+(S.scores[p.name]||0)));
+sb.appendChild(row);
+});
+layout.appendChild(sb);
+}
+
+var main=div(null);
+
+// Flash card
+if(S.flashResult){
+var fr=S.flashResult;
+var fc=card({marginBottom:‘12px’,padding:‘20px’,textAlign:‘center’,
+borderColor:fr.pts>0?‘rgba(80,200,100,0.5)’:‘rgba(200,80,80,0.4)’,
+background:fr.pts>0?‘rgba(80,200,100,0.07)’:‘rgba(200,80,80,0.07)’});
+fc.classList.add(‘flashin’);
+fc.appendChild(div({cls:‘muted’,css:{marginBottom:‘4px’}},fr.guesserName+’ guessed…’));
+fc.appendChild(div({css:{fontSize:‘24px’,fontWeight:‘bold’,marginBottom:‘10px’}},fr.playerName));
+var frow=div({css:{display:‘flex’,justifyContent:‘center’,gap:‘12px’,alignItems:‘center’,flexWrap:‘wrap’}});
+frow.appendChild(badge(fr.rank));
+if(fr.found&&stat)frow.appendChild(span({cls:‘muted’},stat.fmt(fr.value)+’ ‘+stat.label));
+frow.appendChild(span({css:{fontWeight:‘bold’,color:fr.pts>0?’#50c864’:’#ff8080’,fontSize:‘18px’}},’+’+fr.pts+’ pts’));
+fc.appendChild(frow);main.appendChild(fc);
+}
+
+// Turn card
+var tc=card({marginBottom:‘12px’});
+if(myTurn){
+tc.appendChild(h(‘h3’,{css:{fontSize:‘16px’,color:’#f5c842’,marginBottom:‘14px’}},‘🎯 Your Turn — guess a player!’));
+var inputRow=div({css:{display:‘flex’,gap:‘10px’}});
+var acWrap=div({css:{flex:‘1’,position:‘relative’}});
+var inp=h(‘input’,{type:‘text’,placeholder:‘Type a player name…’,autocomplete:‘off’});
+inp.value=S.input;
+
+```
+var acBox=div({cls:'autocomplete-box',css:{display:'none'}});
+acWrap.appendChild(inp);acWrap.appendChild(acBox);
+
+function refreshAC(){
+  acBox.innerHTML='';
+  var suggs=S.suggestions;
+  if(!suggs||!suggs.length){acBox.style.display='none';return;}
+  acBox.style.display='block';
+  suggs.forEach(function(p,i){
+    var item=div({cls:'ac-item'+(i===S.acIdx?' active':'')});
+    item.appendChild(badge(p.rank));
+    item.appendChild(document.createTextNode(' '+p.name));
+    item.addEventListener('mousedown',function(ev){
+      ev.preventDefault();
+      inp.value=p.name;S.input=p.name;S.suggestions=[];refreshAC();inp.focus();
+    });
+    acBox.appendChild(item);
+  });
+}
+inp.addEventListener('input',function(){
+  S.input=inp.value;
+  if(S.input.length<2){S.suggestions=[];S.acIdx=-1;refreshAC();return;}
+  var n=normName(S.input);
+  S.suggestions=(S.leaderboard||[]).filter(function(p){return normName(p.name).indexOf(n)!==-1;}).slice(0,8);
+  S.acIdx=-1;refreshAC();
+});
+inp.addEventListener('keydown',function(ev){
+  var suggs=S.suggestions;
+  if(ev.key==='ArrowDown'){ev.preventDefault();S.acIdx=Math.min(S.acIdx+1,suggs.length-1);refreshAC();}
+  else if(ev.key==='ArrowUp'){ev.preventDefault();S.acIdx=Math.max(S.acIdx-1,-1);refreshAC();}
+  else if(ev.key==='Enter'){
+    ev.preventDefault();
+    if(S.acIdx>=0&&suggs[S.acIdx]){inp.value=suggs[S.acIdx].name;S.input=inp.value;S.suggestions=[];refreshAC();}
+    else doGuess(S.input);
+  }
+  else if(ev.key==='Escape'){S.suggestions=[];refreshAC();}
+});
+inp.addEventListener('blur',function(){setTimeout(function(){S.suggestions=[];refreshAC();},180);});
+inp.addEventListener('focus',function(){
+  if(S.input.length>=2){var n=normName(S.input);S.suggestions=(S.leaderboard||[]).filter(function(p){return normName(p.name).indexOf(n)!==-1;}).slice(0,8);refreshAC();}
+});
+
+var guessBtn=btn('btn-gold','Guess →',function(){doGuess(S.input);},{css:{whiteSpace:'nowrap',padding:'10px 18px'}});
+inputRow.appendChild(acWrap);inputRow.appendChild(guessBtn);
+tc.appendChild(inputRow);
+tc.appendChild(div({cls:'muted',css:{marginTop:'8px'}},'Type a name, pick from autocomplete, then tap Guess.'));
+setTimeout(function(){inp.focus();},40);
 ```
 
+} else {
+tc.appendChild(div({css:{textAlign:‘center’,padding:‘12px 0’}},
+div({css:{fontSize:‘20px’,marginBottom:‘8px’,opacity:‘0.7’}},‘⏳’),
+h(‘p’,{css:{color:‘rgba(245,240,224,0.7)’}},
+‘Waiting for ‘,
+h(‘strong’,{css:{color:’#f5c842’}},curPlayer?curPlayer.name:’…’),
+’ to guess…’
+)
+));
 }
+main.appendChild(tc);
 
-var sortedPlayers = players.slice().sort(function(a, b) { return (scores[b.name] || 0) - (scores[a.name] || 0); });
-var recentGuesses = allGuesses.slice().reverse().slice(0, 8);
-
-return e(‘div’, { style: { minHeight: ‘100vh’, padding: ‘16px 12px’ } },
-// Top bar
-e(‘div’, { style: { maxWidth: 700, margin: ‘0 auto 16px’, display: ‘flex’, alignItems: ‘center’, gap: 10, flexWrap: ‘wrap’ } },
-e(‘span’, { style: { fontFamily: ‘monospace’, color: ‘#f5c842’, fontWeight: ‘bold’, fontSize: 13, background: ‘rgba(245,200,66,0.1)’, border: ‘1px solid rgba(245,200,66,0.3)’, borderRadius: 6, padding: ‘3px 10px’ } }, roomCode),
-e(‘span’, { className: ‘small muted’ }, ‘Round ’ + round + ‘/’ + rounds),
-e(‘span’, { className: ‘small’, style: { marginLeft: ‘auto’, background: ‘rgba(255,255,255,0.06)’, borderRadius: 6, padding: ‘3px 10px’ } },
-(stat ? stat.label : ‘’) + ’ · ’ + (period ? period.label : ‘’)
-)
-),
-e(‘div’, { style: { maxWidth: 700, margin: ‘0 auto’, display: ‘grid’, gridTemplateColumns: players.length > 1 ? ‘190px 1fr’ : ‘1fr’, gap: 12, alignItems: ‘start’ } },
-// Scoreboard column (multi-player only)
-players.length > 1 && e(‘div’, { className: ‘card’, style: { position: ‘sticky’, top: 12 } },
-e(‘h3’, { style: { fontSize: 14, color: ‘#f5c842’, marginBottom: 12 } }, ‘📊 Scores’),
-sortedPlayers.map(function(p) {
-return e(‘div’, { key: p.name, style: { display: ‘flex’, alignItems: ‘center’, gap: 8, padding: ‘7px 0’, borderBottom: ‘1px solid rgba(255,255,255,0.06)’ } },
-currentPlayer && p.name === currentPlayer.name && e(‘span’, { style: { fontSize: 12 } }, ‘⬅’),
-e(‘span’, { style: { flex: 1, fontSize: 14, fontWeight: p.name === myName ? ‘bold’ : ‘normal’, color: p.name === myName ? ‘#f5c842’ : ‘#f5f0e0’ } }, p.name),
-e(‘span’, { style: { fontWeight: ‘bold’, color: ‘#f5c842’ } }, scores[p.name] || 0)
-);
-})
-),
-// Main column
-e(‘div’, null,
-// Flash result
-flashResult && e(‘div’, { className: ‘card flash-card’, style: { marginBottom: 12, borderColor: flashResult.pts > 0 ? ‘rgba(80,200,100,0.5)’ : ‘rgba(200,80,80,0.4)’, background: flashResult.pts > 0 ? ‘rgba(80,200,100,0.07)’ : ‘rgba(200,80,80,0.07)’, padding: 20, textAlign: ‘center’ } },
-e(‘div’, { style: { fontSize: 15, color: ‘rgba(245,240,224,0.7)’, marginBottom: 4 } }, flashResult.guesserName + ’ guessed…’),
-e(‘div’, { style: { fontSize: 24, fontWeight: ‘bold’, marginBottom: 8 } }, flashResult.playerName),
-e(‘div’, { style: { display: ‘flex’, justifyContent: ‘center’, gap: 12, alignItems: ‘center’, flexWrap: ‘wrap’ } },
-e(RankBadge, { rank: flashResult.rank }),
-flashResult.found && stat && e(‘span’, { className: ‘small’, style: { color: ‘rgba(245,240,224,0.6)’ } }, stat.fmt(flashResult.value) + ’ ’ + stat.label),
-e(‘span’, { style: { fontWeight: ‘bold’, color: flashResult.pts > 0 ? ‘#50c864’ : ‘#ff8080’, fontSize: 18 } }, ‘+’ + flashResult.pts + ’ pts’)
-)
-),
-// Turn card
-e(‘div’, { className: ‘card’, style: { marginBottom: 12 } },
-isMyTurn
-? e(‘div’, null,
-e(‘h3’, { style: { fontSize: 16, color: ‘#f5c842’, marginBottom: 14 } }, ‘🎯 Your Turn — guess a player!’),
-e(‘div’, { style: { display: ‘flex’, gap: 10 } },
-e(AutocompleteInput, { value: input, onChange: setInput, leaderboard: leaderboard, onSubmit: handleSubmit }),
-e(‘button’, { className: ‘btn-gold’, style: { whiteSpace: ‘nowrap’, padding: ‘10px 18px’ }, onClick: function() { handleSubmit(input); }, disabled: !input.trim() }, ‘Guess →’)
-),
-e(‘p’, { className: ‘small muted’, style: { marginTop: 8 } }, ‘Type a name, use autocomplete, then hit Guess or Enter.’)
-)
-: e(‘div’, { style: { textAlign: ‘center’, padding: ‘12px 0’ } },
-e(‘div’, { className: ‘pulse-anim’, style: { fontSize: 20, marginBottom: 8 } }, ‘⏳’),
-e(‘p’, { style: { color: ‘rgba(245,240,224,0.7)’ } }, ’Waiting for ‘, e(‘strong’, { style: { color: ‘#f5c842’ } }, currentPlayer ? currentPlayer.name : ‘…’), ’ to guess…’)
-)
-),
 // Recent guesses
-recentGuesses.length > 0 && e(‘div’, { className: ‘card’ },
-e(‘h3’, { style: { fontSize: 14, color: ‘#f5c842’, marginBottom: 12 } }, ‘📝 Recent Guesses’),
-e(‘div’, { style: { display: ‘flex’, flexDirection: ‘column’, gap: 6 } },
-recentGuesses.map(function(g, i) {
-return e(‘div’, { key: i, style: { display: ‘flex’, alignItems: ‘center’, gap: 8, padding: ‘7px 10px’, background: ‘rgba(0,0,0,0.15)’, borderRadius: 8, flexWrap: ‘wrap’ } },
-e(‘span’, { className: ‘small muted’ }, g.guesserName),
-e(‘span’, { style: { flex: 1, fontWeight: ‘bold’, fontSize: 14 } }, g.playerName),
-e(RankBadge, { rank: g.rank }),
-g.found && stat && e(‘span’, { className: ‘small muted’ }, stat.fmt(g.value)),
-e(‘span’, { style: { fontWeight: ‘bold’, color: g.pts > 0 ? ‘#50c864’ : ‘#ff8080’, fontSize: 14 } }, ‘+’ + g.pts)
-);
-})
-)
-),
-// Solo score display
-players.length === 1 && e(‘div’, { className: ‘card’, style: { marginTop: 12 } },
-e(‘div’, { style: { display: ‘flex’, justifyContent: ‘space-between’, alignItems: ‘center’ } },
-e(‘span’, { className: ‘small muted’ }, ‘Your Score’),
-e(‘span’, { style: { fontSize: 28, fontWeight: ‘bold’, color: ‘#f5c842’ } }, scores[myName] || 0)
-),
-e(‘div’, { className: ‘small muted’, style: { marginTop: 4 } }, ’Round ’ + round + ‘/’ + rounds)
-)
-)
-)
-);
+if(recent.length){
+var rg=card(null);
+rg.appendChild(h(‘h3’,{css:{fontSize:‘14px’,color:’#f5c842’,marginBottom:‘12px’}},‘📝 Recent Guesses’));
+var list=div({css:{display:‘flex’,flexDirection:‘column’,gap:‘6px’}});
+recent.forEach(function(g){
+var row=div({css:{display:‘flex’,alignItems:‘center’,gap:‘8px’,padding:‘7px 10px’,background:‘rgba(0,0,0,0.15)’,borderRadius:‘8px’,flexWrap:‘wrap’}});
+row.appendChild(span({cls:‘muted’},g.guesserName));
+row.appendChild(span({css:{flex:‘1’,fontWeight:‘bold’,fontSize:‘14px’}},g.playerName));
+row.appendChild(badge(g.rank));
+if(g.found&&stat)row.appendChild(span({cls:‘muted’},stat.fmt(g.value)));
+row.appendChild(span({css:{fontWeight:‘bold’,color:g.pts>0?’#50c864’:’#ff8080’,fontSize:‘14px’}},’+’+g.pts));
+list.appendChild(row);
+});
+rg.appendChild(list);main.appendChild(rg);
 }
 
-// ── END SCREEN ────────────────────────────────────────────────────────────────
-
-function EndScreen(props) {
-var players = props.players, scores = props.scores, allGuesses = props.allGuesses, settings = props.settings;
-var stat = findStat(settings.statKey);
-var period = findPeriod(settings.timePeriod);
-var sorted = players.slice().sort(function(a, b) { return (scores[b.name] || 0) - (scores[a.name] || 0); });
-var winner = sorted[0];
-
-return e(‘div’, { style: { minHeight: ‘100vh’, padding: ‘24px 16px’ } },
-e(‘div’, { style: { maxWidth: 600, margin: ‘0 auto’ } },
-e(‘div’, { className: ‘card fade-in’, style: { textAlign: ‘center’, marginBottom: 20, borderColor: ‘rgba(245,200,66,0.4)’, background: ‘rgba(245,200,66,0.05)’, padding: 32 } },
-e(‘div’, { style: { fontSize: 56, marginBottom: 8 } }, ‘🏆’),
-e(‘h2’, { style: { fontSize: 28, color: ‘#f5c842’ } }, (winner ? winner.name : ‘’) + ’ Wins!’),
-e(‘div’, { style: { fontSize: 44, fontWeight: ‘bold’, marginTop: 8 } }, (scores[winner && winner.name] || 0) + ’ pts’),
-e(‘p’, { className: ‘small muted’, style: { marginTop: 8 } }, (stat ? stat.label : ‘’) + ’ · ’ + (period ? period.label : ‘’))
-),
-e(‘div’, { className: ‘card fade-in’, style: { marginBottom: 20 } },
-e(‘h3’, { style: { color: ‘#f5c842’, marginBottom: 14 } }, ‘📊 Final Scores’),
-sorted.map(function(p, i) {
-return e(‘div’, { key: p.name, style: { display: ‘flex’, gap: 12, alignItems: ‘center’, padding: ‘10px 0’, borderBottom: i < sorted.length - 1 ? ‘1px solid rgba(255,255,255,0.08)’ : ‘none’ } },
-e(‘span’, { style: { width: 24, color: i === 0 ? ‘#f5c842’ : ‘rgba(245,240,224,0.4)’, fontWeight: ‘bold’ } }, ‘#’ + (i + 1)),
-e(‘span’, { style: { flex: 1, fontSize: 16 } }, p.name),
-e(‘span’, { style: { fontWeight: ‘bold’, fontSize: 20, color: ‘#f5c842’ } }, scores[p.name] || 0)
-);
-})
-),
-e(‘div’, { className: ‘card fade-in’, style: { marginBottom: 24 } },
-e(‘h3’, { style: { color: ‘#f5c842’, marginBottom: 14 } }, ‘📝 Full Guess History’),
-e(‘div’, { style: { display: ‘flex’, flexDirection: ‘column’, gap: 6, maxHeight: 400, overflowY: ‘auto’ } },
-allGuesses.map(function(g, i) {
-return e(‘div’, { key: i, style: { display: ‘flex’, alignItems: ‘center’, gap: 8, padding: ‘8px 10px’, background: ‘rgba(0,0,0,0.15)’, borderRadius: 8, flexWrap: ‘wrap’ } },
-e(‘span’, { className: ‘small muted’, style: { minWidth: 80 } }, ‘R’ + g.round + ’ · ’ + g.guesserName),
-e(‘span’, { style: { flex: 1, fontWeight: ‘bold’, fontSize: 14 } }, g.playerName),
-e(RankBadge, { rank: g.rank }),
-g.found && stat && e(‘span’, { className: ‘small muted’ }, stat.fmt(g.value)),
-e(‘span’, { style: { fontWeight: ‘bold’, color: g.pts > 0 ? ‘#50c864’ : ‘#ff8080’ } }, ‘+’ + g.pts)
-);
-})
-)
-),
-e(‘button’, { className: ‘btn-gold’, style: { width: ‘100%’, padding: 14, fontSize: 17 }, onClick: props.onPlayAgain }, ‘🏠 Play Again’)
-)
-);
+// Solo score
+if(players.length===1){
+main.appendChild(card({marginTop:‘12px’}));
+var soloc=main.lastChild;
+soloc.appendChild(div({css:{display:‘flex’,justifyContent:‘space-between’,alignItems:‘center’}},
+span({cls:‘muted’},‘Your Score’),
+span({css:{fontSize:‘28px’,fontWeight:‘bold’,color:’#f5c842’}},’’+(S.scores[S.myName]||0))
+));
+soloc.appendChild(div({cls:‘muted’,css:{marginTop:‘4px’}},‘Round ‘+S.round+’/’+rounds));
 }
 
-// ── ROOT APP ──────────────────────────────────────────────────────────────────
-
-function App() {
-var s1 = useState(‘home’); var screen = s1[0]; var setScreen = s1[1];
-var s2 = useState(’’); var myName = s2[0]; var setMyName = s2[1];
-var s3 = useState(’’); var roomCode = s3[0]; var setRoomCode = s3[1];
-var s4 = useState(false); var isHost = s4[0]; var setIsHost = s4[1];
-var s5 = useState(null); var leaderboard = s5[0]; var setLeaderboard = s5[1];
-var s6 = useState(null); var endData = s6[0]; var setEndData = s6[1];
-var s7 = useState(null); var error = s7[0]; var setError = s7[1];
-
-// Poll for game start (non-host players waiting in lobby)
-useEffect(function() {
-if (screen !== ‘lobby’ || isHost) return;
-var iv = setInterval(function() {
-var r = getRoom(roomCode);
-if (r && r.state === ‘game’ && r.leaderboard) {
-setLeaderboard(r.leaderboard);
-setScreen(‘game’);
-}
-}, 1000);
-return function() { clearInterval(iv); };
-}, [screen, isHost, roomCode]);
-
-function createRoom(name) {
-var code = rand4();
-setRoom(code, { code: code, host: name, players: [{ name: name }], settings: { statKey: ‘homeRuns’, timePeriod: ‘last5’, rounds: 3, guessesPerRound: 2 }, state: ‘lobby’, leaderboard: null, createdAt: Date.now() });
-setMyName(name); setRoomCode(code); setIsHost(true); setScreen(‘lobby’);
+layout.appendChild(main);wrap.appendChild(layout);return wrap;
 }
 
-function joinRoom(name, code) {
-var room = getRoom(code);
-if (!room) { setError(‘Room not found. Check the code.’); return; }
-if (room.state !== ‘lobby’) { setError(‘Game already in progress.’); return; }
-var players = room.players || [];
-if (!players.find(function(p) { return p.name === name; })) {
-setRoom(code, Object.assign({}, room, { players: players.concat([{ name: name }]) }));
-}
-setMyName(name); setRoomCode(code); setIsHost(false); setScreen(‘lobby’); setError(null);
+function doGuess(nameInput){
+var trimmed=(nameInput||’’).trim();
+if(!trimmed)return;
+var room=getRoom(S.roomCode)||{players:[],settings:{}};
+var players=room.players||[];
+var st=room.settings||{};
+var rounds=st.rounds||3;
+var totalTurns=S.snakeOrder.length;
+
+var found=lookupInLB(trimmed,S.leaderboard||[]);
+var rank=found?found.rank:999;
+var pts=(rank>=1&&rank<=100)?rank:0;
+var result={playerName:found?found.name:trimmed,guesserName:S.myName,rank:rank,value:found?found.value:0,pts:pts,round:S.round,found:!!found};
+
+S.scores[S.myName]=(S.scores[S.myName]||0)+pts;
+S.allGuesses=S.allGuesses.concat([result]);
+S.input=’’;S.suggestions=[];S.acIdx=-1;
+
+if(S.flashTimer)clearTimeout(S.flashTimer);
+S.flashResult=result;
+S.flashTimer=setTimeout(function(){S.flashResult=null;render();},3000);
+
+var next=S.orderIdx+1;
+if(next>=totalTurns){
+if(S.round>=rounds){setTimeout(function(){S.screen=‘end’;render();},350);}
+else{S.round++;S.orderIdx=0;}
+} else {S.orderIdx=next;}
+render();
 }
 
-function startGame(lb) {
-var room = getRoom(roomCode);
-setRoom(roomCode, Object.assign({}, room, { state: ‘game’, leaderboard: lb }));
-setLeaderboard(lb); setScreen(‘game’);
+// ── END ───────────────────────────────────────────────────────────────────────
+function screenEnd(){
+var room=getRoom(S.roomCode)||{players:[],settings:{}};
+var players=room.players||[];
+var st=room.settings||{};
+var stat=getStat(st.statKey);var period=getPeriod(st.timePeriod);
+var sorted=players.slice().sort(function(a,b){return(S.scores[b.name]||0)-(S.scores[a.name]||0);});
+var winner=sorted[0];
+
+var wrap=div({css:{minHeight:‘100vh’,padding:‘24px 16px’}});
+var inner=div({css:{maxWidth:‘600px’,margin:‘0 auto’}});
+
+var wc=card({textAlign:‘center’,marginBottom:‘20px’,padding:‘32px’,borderColor:‘rgba(245,200,66,0.4)’,background:‘rgba(245,200,66,0.04)’});wc.classList.add(‘fadein’);
+wc.appendChild(div({css:{fontSize:‘56px’,marginBottom:‘8px’}},‘🏆’));
+wc.appendChild(h(‘h2’,{css:{fontSize:‘28px’,color:’#f5c842’}},(winner?winner.name:’’)+’ Wins!’));
+wc.appendChild(div({css:{fontSize:‘44px’,fontWeight:‘bold’,marginTop:‘8px’}},’’+(S.scores[winner&&winner.name]||0)+’ pts’));
+wc.appendChild(div({cls:‘muted’,css:{marginTop:‘8px’}},(stat?stat.label:’’)+’ · ‘+(period?period.label:’’)));
+inner.appendChild(wc);
+
+var sc=card({marginBottom:‘20px’});sc.classList.add(‘fadein’);
+sc.appendChild(h(‘h3’,{css:{color:’#f5c842’,marginBottom:‘14px’}},‘📊 Final Scores’));
+sorted.forEach(function(p,i){
+var row=div({css:{display:‘flex’,gap:‘12px’,alignItems:‘center’,padding:‘10px 0’,borderBottom:i<sorted.length-1?‘1px solid rgba(255,255,255,0.08)’:‘none’}});
+row.appendChild(span({css:{width:‘24px’,color:i===0?’#f5c842’:‘rgba(245,240,224,0.4)’,fontWeight:‘bold’}},’#’+(i+1)));
+row.appendChild(span({css:{flex:‘1’,fontSize:‘16px’}},p.name));
+row.appendChild(span({css:{fontWeight:‘bold’,fontSize:‘20px’,color:’#f5c842’}},’’+(S.scores[p.name]||0)));
+sc.appendChild(row);
+});
+inner.appendChild(sc);
+
+var gh=card({marginBottom:‘24px’});gh.classList.add(‘fadein’);
+gh.appendChild(h(‘h3’,{css:{color:’#f5c842’,marginBottom:‘14px’}},‘📝 Full Guess History’));
+var glist=div({css:{display:‘flex’,flexDirection:‘column’,gap:‘6px’,maxHeight:‘380px’,overflowY:‘auto’}});
+S.allGuesses.forEach(function(g){
+var row=div({css:{display:‘flex’,alignItems:‘center’,gap:‘8px’,padding:‘8px 10px’,background:‘rgba(0,0,0,0.15)’,borderRadius:‘8px’,flexWrap:‘wrap’}});
+row.appendChild(span({cls:‘muted’,css:{minWidth:‘80px’}},‘R’+g.round+’ · ‘+g.guesserName));
+row.appendChild(span({css:{flex:‘1’,fontWeight:‘bold’,fontSize:‘14px’}},g.playerName));
+row.appendChild(badge(g.rank));
+if(g.found&&stat)row.appendChild(span({cls:‘muted’},stat.fmt(g.value)));
+row.appendChild(span({css:{fontWeight:‘bold’,color:g.pts>0?’#50c864’:’#ff8080’}},’+’+g.pts));
+glist.appendChild(row);
+});
+gh.appendChild(glist);inner.appendChild(gh);
+
+inner.appendChild(btn(‘btn-gold’,‘🏠 Play Again’,function(){
+S.screen=‘home’;S.leaderboard=null;S.allGuesses=[];S.scores={};S.roomCode=’’;S.isHost=false;render();
+},{css:{width:‘100%’,padding:‘14px’,fontSize:‘17px’}}));
+
+wrap.appendChild(inner);return wrap;
 }
 
-function endGame(finalScores, finalGuesses) {
-var room = getRoom(roomCode);
-if (room) setRoom(roomCode, Object.assign({}, room, { state: ‘ended’ }));
-setEndData({ scores: finalScores, guesses: finalGuesses, settings: room ? room.settings : {} });
-setScreen(‘end’);
-}
-
-function playAgain() {
-setLeaderboard(null); setEndData(null); setRoomCode(’’); setIsHost(false); setScreen(‘home’);
-}
-
-var room = roomCode ? getRoom(roomCode) : null;
-var roomPlayers = (room && room.players) ? room.players : [];
-var roomSettings = (room && room.settings) ? room.settings : {};
-
-return e(‘div’, null,
-error && e(‘div’, { style: { position: ‘fixed’, top: 0, left: 0, right: 0, background: ‘rgba(200,80,80,0.95)’, color: ‘#fff’, padding: ‘12px 20px’, zIndex: 999, display: ‘flex’, justifyContent: ‘space-between’, alignItems: ‘center’, fontSize: 14 } },
-e(‘span’, null, ’⚠️ ’ + error),
-e(‘button’, { onClick: function() { setError(null); }, style: { background: ‘transparent’, color: ‘#fff’, fontSize: 18, lineHeight: 1, cursor: ‘pointer’, border: ‘none’ } }, ‘✕’)
-),
-screen === ‘home’ && e(HomeScreen, { onCreateRoom: createRoom, onJoinRoom: joinRoom }),
-screen === ‘lobby’ && e(LobbyScreen, { roomCode: roomCode, myName: myName, isHost: isHost, onStartGame: startGame,
-onLeave: function() {
-var r = getRoom(roomCode);
-if (r) setRoom(roomCode, Object.assign({}, r, { players: (r.players || []).filter(function(p) { return p.name !== myName; }) }));
-playAgain();
-}
-}),
-screen === ‘game’ && leaderboard && e(GameScreen, { roomCode: roomCode, myName: myName, leaderboard: leaderboard, settings: roomSettings, players: roomPlayers, onEndGame: endGame }),
-screen === ‘end’ && endData && e(EndScreen, { players: roomPlayers, scores: endData.scores, allGuesses: endData.guesses, settings: endData.settings || roomSettings, onPlayAgain: playAgain }),
-e(‘div’, { style: { position: ‘fixed’, bottom: 12, right: 16, fontSize: 11, color: ‘rgba(245,240,224,0.2)’, pointerEvents: ‘none’, userSelect: ‘none’ } }, ‘The 100 Game ⚾’)
-);
-}
-
-ReactDOM.createRoot(document.getElementById(‘root’)).render(e(App, null));
+// ── START ─────────────────────────────────────────────────────────────────────
+render();
 </script>
 
 </body>
